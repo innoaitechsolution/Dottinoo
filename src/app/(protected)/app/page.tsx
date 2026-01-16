@@ -205,6 +205,51 @@ export default function AppPage() {
     }
   }
 
+  const handleCreateDemoUsers = async () => {
+    if (!user?.id) {
+      setDemoUsersError('User ID not available')
+      return
+    }
+
+    const confirmed = window.confirm(
+      'This will create:\n' +
+      '- 1 demo teacher account\n' +
+      '- 1 demo student account\n\n' +
+      'Both accounts will use the password: DottinooDemo123!\n\n' +
+      'Continue?'
+    )
+
+    if (!confirmed) return
+
+    setIsCreatingDemoUsers(true)
+    setDemoUsersError(null)
+    setDemoUsersResult(null)
+
+    try {
+      const response = await fetch('/api/demo/create-demo-users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: user.id }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setDemoUsersError(data.error || 'Failed to create demo users')
+        setIsCreatingDemoUsers(false)
+        return
+      }
+
+      setDemoUsersResult(data)
+      setIsCreatingDemoUsers(false)
+    } catch (error: any) {
+      setDemoUsersError(error.message || 'Failed to create demo users')
+      setIsCreatingDemoUsers(false)
+    }
+  }
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       // Could show a toast here, but keeping it simple for MVP

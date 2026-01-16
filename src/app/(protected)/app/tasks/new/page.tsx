@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, FormEvent } from 'react'
+import { useEffect, useState, FormEvent, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { getMyProfile, Profile } from '@/lib/supabase/profile'
@@ -15,7 +15,7 @@ import styles from './page.module.css'
 
 type CreationMode = 'manual' | 'template' | 'ai'
 
-export default function NewTaskPage() {
+function NewTaskPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -840,3 +840,10 @@ export default function NewTaskPage() {
   )
 }
 
+export default function NewTaskPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NewTaskPageContent />
+    </Suspense>
+  )
+}

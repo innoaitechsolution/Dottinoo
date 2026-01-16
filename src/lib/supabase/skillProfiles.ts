@@ -75,11 +75,11 @@ export async function getStudentsWithSkills(classId: string): Promise<{ data: St
 
   // Get skill profiles for these students in this class
   const studentIds = (memberships || [])
-    .map((m: any) => m.profiles.id)
-    .filter((id: string, idx: number, arr: string[]) => {
-      const profile = (memberships || [])[idx]?.profiles
+    .filter((m: any) => {
+      const profile = m.profiles
       return profile && (profile.role === 'student' || profile.role === 'external')
     })
+    .map((m: any) => m.profiles.id)
 
   if (studentIds.length === 0) {
     return { data: [], error: null }
@@ -100,8 +100,8 @@ export async function getStudentsWithSkills(classId: string): Promise<{ data: St
   
   // Initialize all students with null skills
   for (const membership of memberships || []) {
-    const profile = membership.profiles
-    if (profile && (profile.role === 'student' || profile.role === 'external')) {
+    const profile = (membership as any).profiles
+    if (profile && typeof profile === 'object' && 'role' in profile && (profile.role === 'student' || profile.role === 'external')) {
       skillsMap.set(profile.id, {
         digital_safety: null,
         search_information: null,
@@ -115,16 +115,17 @@ export async function getStudentsWithSkills(classId: string): Promise<{ data: St
   // Fill in existing profiles
   for (const profile of profiles || []) {
     const studentSkills = skillsMap.get(profile.student_id)
-    if (studentSkills) {
-      studentSkills[profile.skill_key] = profile.level
+    if (studentSkills && profile.skill_key in studentSkills) {
+      const skillKey = profile.skill_key as DigitalSkill
+      studentSkills[skillKey] = profile.level
     }
   }
 
   // Build result array
   const students: StudentWithSkills[] = []
   for (const membership of memberships || []) {
-    const profile = membership.profiles
-    if (profile && (profile.role === 'student' || profile.role === 'external')) {
+    const profile = (membership as any).profiles
+    if (profile && typeof profile === 'object' && 'role' in profile && (profile.role === 'student' || profile.role === 'external')) {
       students.push({
         id: profile.id,
         full_name: profile.full_name,

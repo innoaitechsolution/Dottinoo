@@ -12,6 +12,9 @@ import Select from '@/components/Select'
 import BackButton from '@/components/BackButton'
 import styles from './page.module.css'
 
+// Type for local skill edits: classId -> studentId -> skillKey -> level
+type SkillEditsByClass = Record<string, Record<string, Record<DigitalSkill, SkillLevel | null>>>
+
 export default function ClassesPage() {
   const router = useRouter()
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -31,7 +34,7 @@ export default function ClassesPage() {
   const [isLoadingStudents, setIsLoadingStudents] = useState<Record<string, boolean>>({})
   const [isSavingSkills, setIsSavingSkills] = useState<Record<string, boolean>>({})
   const [isBulkSaving, setIsBulkSaving] = useState<Record<string, boolean>>({})
-  const [localSkillEdits, setLocalSkillEdits] = useState<Record<string, Record<string, SkillLevel | null>>>({})
+  const [localSkillEdits, setLocalSkillEdits] = useState<SkillEditsByClass>({})
 
   useEffect(() => {
     const loadData = async () => {
@@ -148,7 +151,7 @@ export default function ClassesPage() {
     setIsLoadingStudents({ ...isLoadingStudents, [classId]: false })
     
     // Initialize local edits with current values
-    const edits: Record<string, Record<string, SkillLevel | null>> = {}
+    const edits: Record<string, Record<DigitalSkill, SkillLevel | null>> = {}
     students.forEach(student => {
       edits[student.id] = { ...student.skills }
     })
@@ -232,7 +235,7 @@ export default function ClassesPage() {
       setStudentsByClass({ ...studentsByClass, [classId]: reloadedStudents })
       
       // Reset local edits
-      const edits: Record<string, Record<string, SkillLevel | null>> = {}
+      const edits: Record<string, Record<DigitalSkill, SkillLevel | null>> = {}
       reloadedStudents.forEach(student => {
         edits[student.id] = { ...student.skills }
       })
