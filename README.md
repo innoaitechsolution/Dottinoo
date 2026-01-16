@@ -347,10 +347,80 @@ The app uses the following brand palette defined as CSS variables:
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon/public key |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | Yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon/public key | Yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (for server-side operations) | Optional (for demo seed) |
+| `OPENAI_API_KEY` | OpenAI API key for AI task drafts | Optional |
+| `AI_DRAFTS_ENABLED` | Set to `"true"` to enable AI task draft generation | Optional |
+| `DEMO_SEED_ENABLED` | Set to `"true"` to enable demo seed utilities | Optional |
+
+**Note:** The app uses lazy initialization for Supabase client, so the build will succeed even if environment variables are missing. However, the app will require these variables at runtime.
+
+## Deploying to Netlify
+
+### Prerequisites
+
+1. A Netlify account
+2. Your Supabase project set up (see Setup Instructions above)
+3. A GitHub/GitLab repository with your code
+
+### Deployment Steps
+
+1. **Connect Repository to Netlify**
+   - Go to [Netlify Dashboard](https://app.netlify.com)
+   - Click "Add new site" → "Import an existing project"
+   - Connect your Git repository
+   - Netlify will auto-detect Next.js settings
+
+2. **Configure Build Settings**
+   - Build command: `npm run build`
+   - Publish directory: `.next` (Next.js will handle this automatically)
+   - Node version: 18 or higher (set in Netlify UI or `netlify.toml`)
+
+3. **Set Environment Variables**
+   - Go to Site settings → Environment variables
+   - Add the following variables:
+
+   **Required:**
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+   **Optional (for demo/development features):**
+   ```
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   OPENAI_API_KEY=your_openai_api_key
+   AI_DRAFTS_ENABLED=true
+   DEMO_SEED_ENABLED=true
+   ```
+
+   **Important:**
+   - Do NOT commit `.env.local` to your repository
+   - Environment variables in Netlify are set per-site, not per-deployment
+   - `NEXT_PUBLIC_*` variables are exposed to the client (safe for anon key)
+   - `SUPABASE_SERVICE_ROLE_KEY` is server-only and should never be exposed to the client
+
+4. **Deploy**
+   - Netlify will automatically deploy on every push to your main branch
+   - Or trigger a manual deploy from the Deploys tab
+
+### Build Safety
+
+The app is configured to build successfully on Netlify even if environment variables are missing:
+- Supabase client uses lazy initialization (checks env vars at runtime, not build time)
+- Public pages (/, /login, /signup, /terms, /privacy, /onboarding) can be statically generated
+- Protected pages are client-side rendered and require env vars only at runtime
+
+**Note:** While the build will succeed without env vars, the app will not function correctly at runtime without the required Supabase variables. Always set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Netlify.
+
+### Troubleshooting
+
+- **Build fails with "Missing Supabase environment variables"**: This should not happen with the current setup. If it does, check that you're using the latest version of `src/lib/supabase/client.ts`
+- **App works locally but not on Netlify**: Verify environment variables are set correctly in Netlify (check Site settings → Environment variables)
+- **Static pages fail to generate**: Public pages should generate successfully. If they don't, check the build logs for specific errors
 
 ## QA Checklist
 
