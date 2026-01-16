@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
 import styles from './Header.module.css'
@@ -13,17 +13,38 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
+    // Only check session if Supabase is configured
+    if (!isSupabaseConfigured()) {
+      return
+    }
+
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setIsLoggedIn(!!session)
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (!error) {
+          setIsLoggedIn(!!session)
+        }
+      } catch (err) {
+        // Silently fail - Supabase not configured
+        console.warn('Supabase not configured')
+      }
     }
     checkSession()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkSession()
-    })
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+        checkSession()
+      })
 
-    return () => subscription.unsubscribe()
+      return () => {
+        if (subscription) {
+          subscription.unsubscribe()
+        }
+      }
+    } catch (err) {
+      // Silently fail - Supabase not configured
+      return () => {}
+    }
   }, [])
 
   const handleLogoClick = (e: React.MouseEvent) => {

@@ -4,12 +4,18 @@ import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { signIn } from '@/lib/supabase/auth'
+import { isSupabaseConfigured } from '@/lib/supabase/client'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
 import AuthLayout from '@/components/AuthLayout/AuthLayout'
+import ConfigError from '@/components/ConfigError'
 import styles from './page.module.css'
 
 export default function LoginPage() {
+  // Show config error if Supabase is not configured
+  if (!isSupabaseConfigured()) {
+    return <ConfigError />
+  }
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

@@ -4,15 +4,21 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase/client'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import ProviderButton from '@/components/ProviderButton'
 import AuthLayout from '@/components/AuthLayout/AuthLayout'
+import ConfigError from '@/components/ConfigError'
 import styles from './page.module.css'
 
 export default function OnboardingPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  // Show config error if Supabase is not configured
+  if (!isSupabaseConfigured()) {
+    return <ConfigError />
+  }
 
   const handleOAuthSignIn = async (provider: 'google' | 'apple' | 'microsoft') => {
     setIsLoading(provider)

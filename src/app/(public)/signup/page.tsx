@@ -4,11 +4,12 @@ import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { signUp } from '@/lib/supabase/auth'
-import { supabase } from '@/lib/supabase/client'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
 import Select from '@/components/Select'
 import AuthLayout from '@/components/AuthLayout/AuthLayout'
+import ConfigError from '@/components/ConfigError'
 import styles from './page.module.css'
 
 type MainRole = 'student' | 'parent' | 'school' | 'social-services' | 'third-party' | 'local-authority'
@@ -18,6 +19,11 @@ const SUPPORTED_ROLES: MainRole[] = ['student', 'school']
 const REQUEST_ACCESS_ROLES: MainRole[] = ['parent', 'social-services', 'third-party', 'local-authority']
 
 export default function SignUpPage() {
+  // Show config error if Supabase is not configured
+  if (!isSupabaseConfigured()) {
+    return <ConfigError />
+  }
+
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
