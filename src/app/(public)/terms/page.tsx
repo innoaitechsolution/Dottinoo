@@ -58,6 +58,7 @@ export default function TermsPage() {
             <Button variant="primary">Back to Sign Up</Button>
           </Link>
         </div>
+      </div>
     </AuthLayout>
   )
 }

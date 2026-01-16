@@ -76,6 +76,7 @@ export default function PrivacyPage() {
             <Button variant="primary">Back to Sign Up</Button>
           </Link>
         </div>
+      </div>
     </AuthLayout>
   )
 }
