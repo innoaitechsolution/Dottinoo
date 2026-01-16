@@ -1,0 +1,133 @@
+.container {
+  min-height: calc(100vh - 80px);
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-xl);
+}
+
+.section {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: 0 2px 8px rgba(19, 62, 108, 0.1);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-lg);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.submitButton {
+  align-self: flex-start;
+}
+
+.errorMessage {
+  padding: var(--spacing-md);
+  background-color: rgba(180, 81, 29, 0.1);
+  border: 1px solid var(--color-energy-orange);
+  border-radius: var(--radius-md);
+  color: var(--color-energy-orange);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.successMessage {
+  padding: var(--spacing-md);
+  background-color: rgba(90, 233, 213, 0.2);
+  border: 1px solid var(--color-aqua);
+  border-radius: var(--radius-md);
+  color: var(--color-deep-navy);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.classesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.classCard {
+  background-color: var(--color-bg-blue-50);
+  border: 1px solid var(--color-bg-blue-100);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  transition: box-shadow 0.2s ease;
+}
+
+.classCard:hover {
+  box-shadow: 0 2px 8px rgba(19, 62, 108, 0.15);
+}
+
+.className {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-sm);
+}
+
+.inviteCode {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.inviteLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-soft);
+}
+
+.code {
+  font-family: 'Courier New', monospace;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  background-color: var(--color-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary-blue);
+  letter-spacing: 1px;
+}
+
+.classDate {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-soft);
+  margin: 0;
+}
+
+.emptyMessage {
+  color: var(--color-text-soft);
+  font-size: var(--font-size-base);
+  text-align: center;
+  padding: var(--spacing-xl);
+  font-style: italic;
+}
+
+.loading {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-soft);
+  text-align: center;
+  padding: var(--spacing-xxl);
+}
+

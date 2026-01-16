@@ -1,0 +1,131 @@
+.logoSection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.logo {
+  width: auto;
+  height: 72px;
+  object-fit: contain;
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+}
+
+.subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-soft);
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.errorMessage {
+  padding: var(--spacing-md);
+  background-color: rgba(180, 81, 29, 0.1);
+  border: 1px solid var(--color-energy-orange);
+  border-radius: var(--radius-md);
+  color: var(--color-energy-orange);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.submitButton {
+  width: 100%;
+  margin-top: var(--spacing-md);
+}
+
+.footer {
+  margin-top: var(--spacing-xl);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-soft);
+}
+
+.link {
+  color: var(--color-primary-blue);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+}
+
+.link:hover {
+  color: var(--color-deep-navy);
+}
+
+.emailConfirmation {
+  text-align: center;
+  padding: var(--spacing-lg) 0;
+}
+
+.confirmationTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-md);
+}
+
+.confirmationMessage {
+  font-size: var(--font-size-base);
+  color: var(--color-text-soft);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-xl);
+}
+
+.confirmationMessage strong {
+  color: var(--color-deep-navy);
+  font-weight: var(--font-weight-semibold);
+}
+
+.backToLoginButton {
+  margin-top: var(--spacing-md);
+}
+
+.requestAccess {
+  text-align: center;
+  padding: var(--spacing-lg) 0;
+}
+
+.requestTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-md);
+}
+
+.requestMessage {
+  font-size: var(--font-size-base);
+  color: var(--color-text-soft);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-xl);
+}
+
+.requestActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.contactLink {
+  color: var(--color-primary-blue);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.contactLink:hover {
+  color: var(--color-deep-navy);
+}
+

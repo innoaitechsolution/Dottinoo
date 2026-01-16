@@ -1,0 +1,66 @@
+.header {
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-bg-blue-100);
+  padding: var(--spacing-md) 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(19, 62, 108, 0.1);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.logoLink {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+  transition: opacity 0.2s ease;
+}
+
+.logoLink:hover {
+  opacity: 0.8;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.logoWrapper {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.logo {
+  width: auto;
+  height: 28px;
+  object-fit: contain;
+}
+
+.logoPlaceholder {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-blue), var(--color-aqua));
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+}
+
+.brandName {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin: 0;
+}
+

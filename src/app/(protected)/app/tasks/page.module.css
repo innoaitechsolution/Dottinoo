@@ -1,0 +1,173 @@
+.container {
+  min-height: calc(100vh - 80px);
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.backButton {
+  margin-bottom: var(--spacing-md);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  margin: 0;
+}
+
+.errorMessage {
+  padding: var(--spacing-md);
+  background-color: rgba(180, 81, 29, 0.1);
+  border: 1px solid var(--color-energy-orange);
+  border-radius: var(--radius-md);
+  color: var(--color-energy-orange);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+  word-break: break-word;
+}
+
+.errorMessage code {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-soft);
+  font-family: 'Courier New', monospace;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.tasksList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.taskLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.taskCard {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-bg-blue-100);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: 0 2px 8px rgba(19, 62, 108, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.taskCard:hover {
+  box-shadow: 0 4px 12px rgba(19, 62, 108, 0.15);
+}
+
+.taskHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.taskTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
+}
+
+.dueDate {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-energy-orange);
+  background-color: rgba(180, 81, 29, 0.1);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.taskInfoRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-sm);
+}
+
+.className {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary-blue);
+  margin: 0;
+}
+
+.skillLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-soft);
+  background-color: var(--color-bg-blue-50);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  margin: 0;
+}
+
+.counts {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-soft);
+  margin-left: auto;
+}
+
+.taskInstructions {
+  display: none; /* Hide long instructions in list view */
+}
+
+.taskMeta {
+  display: flex;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-bg-blue-100);
+}
+
+.metaItem {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-soft);
+}
+
+.emptyState {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xxl);
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(19, 62, 108, 0.1);
+}
+
+.emptyMessage {
+  color: var(--color-text-soft);
+  font-size: var(--font-size-base);
+  font-style: italic;
+  margin: 0;
+}
+
+.loading {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-soft);
+  text-align: center;
+  padding: var(--spacing-xxl);
+}
+

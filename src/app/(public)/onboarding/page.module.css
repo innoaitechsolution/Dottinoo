@@ -1,0 +1,122 @@
+.logoSection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.logoBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  background-color: var(--color-bg-blue-50);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm);
+  box-shadow: 0 2px 8px rgba(19, 62, 108, 0.08);
+}
+
+.logo {
+  width: auto;
+  height: 72px;
+  object-fit: contain;
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+}
+
+.subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-soft);
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.errorMessage {
+  padding: var(--spacing-md);
+  background-color: rgba(180, 81, 29, 0.1);
+  border: 1px solid var(--color-energy-orange);
+  border-radius: var(--radius-md);
+  color: var(--color-energy-orange);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin: var(--spacing-sm) 0;
+}
+
+.separatorLine {
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-bg-blue-100);
+}
+
+.separatorText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-soft);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.secondaryAction {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-bg-blue-100);
+}
+
+.secondaryText {
+  font-size: var(--font-size-base);
+  color: var(--color-text-soft);
+  margin: 0;
+}
+
+.secondaryLink {
+  color: var(--color-primary-blue);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+}
+
+.secondaryLink:hover {
+  color: var(--color-deep-navy);
+}
+
+.footer {
+  text-align: center;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-bg-blue-100);
+}
+
+.footerText {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-soft);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.footerLink {
+  color: var(--color-primary-blue);
+  text-decoration: underline;
+}
+
+.footerLink:hover {
+  color: var(--color-deep-navy);
+}
+

@@ -1,0 +1,37 @@
+.container {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl) var(--spacing-lg);
+  background: linear-gradient(180deg, var(--color-light-sky) 0%, var(--color-bg-blue-50) 100%);
+  position: relative;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(19, 62, 108, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xxl);
+  box-shadow: 0 4px 12px rgba(19, 62, 108, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.cardWide {
+  max-width: 800px;
+}
+

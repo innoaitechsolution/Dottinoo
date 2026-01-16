@@ -1,0 +1,60 @@
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.textContent {
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.lastUpdated {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-soft);
+  font-style: italic;
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-md);
+}
+
+.section p {
+  margin-bottom: var(--spacing-md);
+  color: var(--text);
+}
+
+.list {
+  margin-left: var(--spacing-lg);
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.list li {
+  margin-bottom: var(--spacing-xs);
+  color: var(--text);
+}
+
+.actions {
+  margin-top: var(--spacing-xxl);
+  text-align: center;
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-bg-blue-100);
+}
+

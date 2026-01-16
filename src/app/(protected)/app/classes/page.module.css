@@ -1,0 +1,293 @@
+.container {
+  min-height: calc(100vh - 80px);
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.backButton {
+  margin-bottom: var(--spacing-md);
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-xl);
+}
+
+.section {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: 0 2px 8px rgba(19, 62, 108, 0.1);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-lg);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.submitButton {
+  align-self: flex-start;
+}
+
+.errorMessage {
+  padding: var(--spacing-md);
+  background-color: rgba(180, 81, 29, 0.1);
+  border: 1px solid var(--color-energy-orange);
+  border-radius: var(--radius-md);
+  color: var(--color-energy-orange);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.successMessage {
+  padding: var(--spacing-md);
+  background-color: rgba(90, 233, 213, 0.2);
+  border: 1px solid var(--color-aqua);
+  border-radius: var(--radius-md);
+  color: var(--color-deep-navy);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.classesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.classCard {
+  background-color: var(--color-bg-blue-50);
+  border: 1px solid var(--color-bg-blue-100);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  transition: box-shadow 0.2s ease;
+}
+
+.classCard:hover {
+  box-shadow: 0 2px 8px rgba(19, 62, 108, 0.15);
+}
+
+.className {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-sm);
+}
+
+.inviteCode {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.inviteLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-soft);
+}
+
+.code {
+  font-family: 'Courier New', monospace;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  background-color: var(--color-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary-blue);
+  letter-spacing: 1px;
+}
+
+.classDate {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-soft);
+  margin: 0;
+  margin-bottom: var(--spacing-sm);
+}
+
+.createTaskButton {
+  margin-top: var(--spacing-sm);
+}
+
+.emptyMessage {
+  color: var(--color-text-soft);
+  font-size: var(--font-size-base);
+  text-align: center;
+  padding: var(--spacing-xl);
+  font-style: italic;
+}
+
+.loading {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-soft);
+  text-align: center;
+  padding: var(--spacing-xxl);
+}
+
+.manageStudentsButton {
+  margin-top: var(--spacing-sm);
+  margin-left: var(--spacing-sm);
+}
+
+.studentsSection {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 2px solid var(--color-bg-blue-100);
+}
+
+.loadingText {
+  color: var(--color-text-soft);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  padding: var(--spacing-md);
+  text-align: center;
+}
+
+.studentsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+}
+
+.studentCard {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-bg-blue-100);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.studentName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-md);
+}
+
+.skillsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.skillRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.skillLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text);
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.skillSelect {
+  flex: 1;
+  min-width: 120px;
+}
+
+.studentsSectionTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-md);
+}
+
+.loadingState,
+.emptyState {
+  padding: var(--spacing-lg);
+  text-align: center;
+}
+
+.studentsTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--color-bg-blue-100);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 200px repeat(5, 1fr);
+  gap: var(--spacing-sm);
+  background-color: var(--color-bg-blue-100);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  border-bottom: 2px solid var(--color-bg-blue-100);
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 200px repeat(5, 1fr);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-bg-blue-100);
+  transition: background-color 0.2s ease;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background-color: var(--color-bg-blue-50);
+}
+
+.tableCell {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
+
+.studentId {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-soft);
+  margin-top: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+.saveActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-bg-blue-100);
+}
+
+@media (max-width: 768px) {
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 150px repeat(5, 1fr);
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+  
+  .tableCell {
+    min-height: 36px;
+  }
+}

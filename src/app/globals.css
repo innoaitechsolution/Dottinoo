@@ -1,0 +1,94 @@
+/**
+ * Global styles and CSS variables for Dottinoo brand
+ */
+
+:root {
+  /* Brand Colors */
+  --color-primary-blue: #4196E2;
+  --color-deep-navy: #133E6C;
+  --color-bg-blue-50: #ECF4FC;
+  --color-bg-blue-100: #D9EAF9;
+  --color-light-sky: #93CEEE;
+  --color-aqua: #90E9D5;
+  --color-reward-yellow: #F5D86F;
+  --color-energy-orange: #B4511D;
+  --color-text-soft: #355A7F;
+  --color-white: #FFFFFF;
+
+  /* Semantic Colors */
+  --bg: var(--color-bg-blue-50);
+  --text: var(--color-deep-navy);
+  --text-soft: var(--color-text-soft);
+
+  /* Button Colors */
+  --button-primary-bg: #2C6EAD;
+  --button-primary-bg-hover: #1F5A8F;
+  --button-primary-text: var(--color-white);
+  
+  --button-reward-bg: var(--color-reward-yellow);
+  --button-reward-bg-hover: #E8C85A;
+  --button-reward-text: var(--color-deep-navy);
+  
+  --button-energy-bg: var(--color-energy-orange);
+  --button-energy-bg-hover: #9A4216;
+  --button-energy-text: var(--color-white);
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: var(--font-sans);
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input {
+  font-family: inherit;
+}
+

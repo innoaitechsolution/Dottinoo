@@ -1,0 +1,178 @@
+.container {
+  min-height: calc(100vh - 80px);
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.backButton {
+  margin-bottom: var(--spacing-md);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-deep-navy);
+  margin: 0;
+}
+
+.errorMessage {
+  padding: var(--spacing-md);
+  background-color: rgba(180, 81, 29, 0.1);
+  border: 1px solid var(--color-energy-orange);
+  border-radius: var(--radius-md);
+  color: var(--color-energy-orange);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.teacherView,
+.studentView {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.infoText {
+  font-size: var(--font-size-base);
+  color: var(--color-text-soft);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-blue-50);
+  border-radius: var(--radius-md);
+}
+
+.totalStarsCard {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xxl);
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(19, 62, 108, 0.1);
+  border: 2px solid var(--color-reward-yellow);
+}
+
+.totalStarsTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-md);
+}
+
+.totalStarsValue {
+  font-size: 4rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-blue);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1;
+}
+
+.totalStarsSubtext {
+  font-size: var(--font-size-base);
+  color: var(--color-text-soft);
+  margin: 0;
+}
+
+.recentSection {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: 0 2px 8px rgba(19, 62, 108, 0.1);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin-bottom: var(--spacing-lg);
+}
+
+.starsList,
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.starCard,
+.reviewCard {
+  padding: var(--spacing-lg);
+  background-color: var(--color-bg-blue-50);
+  border: 1px solid var(--color-bg-blue-100);
+  border-radius: var(--radius-md);
+  transition: box-shadow 0.2s ease;
+}
+
+.starCard:hover,
+.reviewCard:hover {
+  box-shadow: 0 2px 8px rgba(19, 62, 108, 0.15);
+}
+
+.starCardHeader,
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.taskTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-deep-navy);
+  margin: 0;
+  flex: 1;
+}
+
+.starsDisplay {
+  font-size: var(--font-size-xl);
+  white-space: nowrap;
+}
+
+.feedback {
+  font-size: var(--font-size-base);
+  color: var(--text);
+  line-height: 1.6;
+  margin: var(--spacing-sm) 0;
+  font-style: italic;
+}
+
+.reviewDate {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-soft);
+  margin: 0;
+}
+
+.emptyState {
+  padding: var(--spacing-xxl);
+  text-align: center;
+  background-color: var(--color-bg-blue-50);
+  border-radius: var(--radius-md);
+}
+
+.emptyState p {
+  color: var(--color-text-soft);
+  font-size: var(--font-size-base);
+  font-style: italic;
+  margin: 0;
+}
+
+.loading {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-soft);
+  text-align: center;
+  padding: var(--spacing-xxl);
+}
+

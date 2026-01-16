@@ -1,0 +1,30 @@
+.chip {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.not_started {
+  background-color: var(--color-bg-blue-100);
+  color: var(--color-text-soft);
+}
+
+.in_progress {
+  background-color: rgba(65, 150, 226, 0.2);
+  color: var(--color-primary-blue);
+}
+
+.submitted {
+  background-color: rgba(90, 233, 213, 0.2);
+  color: var(--color-deep-navy);
+}
+
+.reviewed {
+  background-color: rgba(245, 216, 111, 0.3);
+  color: var(--color-deep-navy);
+}
+
