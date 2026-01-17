@@ -53,6 +53,17 @@
   background-color: var(--button-energy-bg-hover);
 }
 
+.secondary {
+  background-color: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  border: 1px solid var(--button-secondary-border);
+}
+
+.secondary:not(:disabled):hover {
+  background-color: var(--button-secondary-bg-hover);
+  border-color: var(--button-primary-bg);
+}
+
 /* Sizes */
 .sm {
   padding: var(--spacing-sm) var(--spacing-md);

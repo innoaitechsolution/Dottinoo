@@ -38,6 +38,10 @@
   --button-energy-bg: #B4511D;
   --button-energy-bg-hover: #9A4216;
   --button-energy-text: #FFFFFF;
+  --button-secondary-bg: #FFFFFF;
+  --button-secondary-bg-hover: #ECF4FC;
+  --button-secondary-text: #133E6C;
+  --button-secondary-border: #2C6EAD;
   
   /* Spacing */
   --spacing-xs: 0.25rem;
