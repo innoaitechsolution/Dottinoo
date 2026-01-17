@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { signIn } from '@/lib/supabase/auth'
+import { signIn, signOut } from '@/lib/supabase/auth'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
@@ -28,6 +28,11 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+      // Clear any existing session so the new login is not mixed with a previous user.
+      // This prevents the "teacher logs in but sees student dashboard" bug when switching
+      // between demo accounts (e.g. student session was active, then teacher logs in).
+      await signOut().catch(() => {})
+
       const { data, error: signInError } = await signIn(email, password)
 
       if (signInError) {

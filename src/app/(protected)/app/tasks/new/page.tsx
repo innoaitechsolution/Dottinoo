@@ -161,6 +161,14 @@ function NewTaskPageContent() {
     setSteps(template.steps)
     setDifferentiation(template.differentiation)
     setSuccessCriteria(template.successCriteria)
+    
+    // Set target skill and level if present in template
+    if (template.targetSkill) {
+      setTargetSkill(template.targetSkill)
+    }
+    if (template.targetLevel) {
+      setTargetLevel(template.targetLevel)
+    }
   }
 
   const handleGenerateDraft = async () => {
@@ -173,6 +181,22 @@ function NewTaskPageContent() {
     setError(null)
 
     try {
+      // Auto-populate support needs from selected students if available
+      let autoSupportNeeds = supportNeeds
+      if (!autoSupportNeeds && assignTo === 'selected_students' && selectedStudentIds.size > 0) {
+        const supportNeedsSet = new Set<string>()
+        for (const studentId of selectedStudentIds) {
+          const student = classStudents.find(s => s.id === studentId)
+          if (student?.support_needs_tags && Array.isArray(student.support_needs_tags)) {
+            student.support_needs_tags.forEach((tag: string) => supportNeedsSet.add(tag))
+          }
+        }
+        if (supportNeedsSet.size > 0) {
+          autoSupportNeeds = Array.from(supportNeedsSet).join(', ')
+          setSupportNeeds(autoSupportNeeds)
+        }
+      }
+
       const response = await fetch('/api/ai/task-draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -180,12 +204,17 @@ function NewTaskPageContent() {
           brief: aiBrief,
           subject,
           timeEstimate,
-          supportNeeds: supportNeeds || null,
+          supportNeeds: autoSupportNeeds || null,
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate draft')
+        const errorData = await response.json().catch(() => ({}))
+        if (response.status === 403) {
+          setError('AI draft generation is disabled. Please use Manual or Template mode.')
+        } else {
+          throw new Error(errorData.error || 'Failed to generate draft')
+        }
       }
 
       const draft = await response.json()
@@ -195,9 +224,9 @@ function NewTaskPageContent() {
       setSteps(draft.steps || [''])
       setDifferentiation(draft.differentiation || { easier: '', standard: '', stretch: '' })
       setSuccessCriteria(draft.successCriteria || [''])
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error generating draft:', err)
-      setError('Failed to generate draft. Please try manual entry.')
+      setError(err.message || 'Failed to generate draft. Please try manual entry or use Template mode.')
     } finally {
       setIsGeneratingDraft(false)
     }

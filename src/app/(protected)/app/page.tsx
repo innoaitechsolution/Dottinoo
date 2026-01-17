@@ -58,10 +58,37 @@ export default function AppPage() {
 
         if (profileError) {
           console.error('Error loading profile:', profileError)
-          // Don't redirect, just show that profile is missing
+          router.push('/login')
+          return
+        }
+
+        if (!profileData) {
+          router.push('/login')
+          return
         }
 
         setProfile(profileData)
+
+        // Redirect based on role to dedicated dashboards
+        if (profileData.role === 'teacher' || profileData.role === 'admin') {
+          router.push('/app/teacher')
+          return
+        } else if (profileData.role === 'student' || profileData.role === 'external') {
+          router.push('/app/student')
+          return
+        }
+
+        // Dev-only: log current user, role source, and dashboard type for debugging auth/role issues
+        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+          const u = userData || session?.user
+          console.log('[Auth]', {
+            userId: u?.id,
+            email: u?.email,
+            role: profileData?.role,
+            roleSource: 'profiles',
+            dashboard: profileData?.role === 'teacher' ? 'teacher' : profileData?.role === 'student' ? 'student' : profileData?.role === 'admin' ? 'admin' : 'external',
+          })
+        }
 
         // Demo seed is available for teachers/admins (API will check if enabled)
         setDemoSeedEnabled(true)

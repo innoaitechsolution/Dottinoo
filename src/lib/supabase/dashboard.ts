@@ -127,7 +127,7 @@ export async function listStudentNextTasks(limit: number = 3): Promise<{ data: N
         )
       `)
       .eq('student_id', user.id)
-      .order('tasks.due_date', { ascending: true, nullsFirst: false })
+      .order('due_date', { foreignTable: 'tasks', ascending: true, nullsFirst: false })
       .limit(limit)
 
     if (error) {

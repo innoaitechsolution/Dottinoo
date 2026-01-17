@@ -526,6 +526,87 @@ export default function TaskDetailPage() {
                             <label htmlFor={`feedback-${ass.student_id}`} className={styles.label}>
                               Feedback
                             </label>
+                            {ass.status === 'submitted' && (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    const currentFeedback = reviewForms[ass.student_id]?.feedback || ''
+                                    const newFeedback = currentFeedback ? `${currentFeedback}\n\nGreat job! You've demonstrated a good understanding of the topic.` : 'Great job! You\'ve demonstrated a good understanding of the topic.'
+                                    updateReviewForm(ass.student_id, 'feedback', newFeedback)
+                                  }}
+                                  disabled={isReviewingThis}
+                                >
+                                  Great job
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    const currentFeedback = reviewForms[ass.student_id]?.feedback || ''
+                                    const newFeedback = currentFeedback ? `${currentFeedback}\n\nNext step: Consider exploring this further by...` : 'Next step: Consider exploring this further by...'
+                                    updateReviewForm(ass.student_id, 'feedback', newFeedback)
+                                  }}
+                                  disabled={isReviewingThis}
+                                >
+                                  Next step
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    const currentFeedback = reviewForms[ass.student_id]?.feedback || ''
+                                    const newFeedback = currentFeedback ? `${currentFeedback}\n\nBe more specific: Please provide more detail about...` : 'Be more specific: Please provide more detail about...'
+                                    updateReviewForm(ass.student_id, 'feedback', newFeedback)
+                                  }}
+                                  disabled={isReviewingThis}
+                                >
+                                  Be more specific
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    const currentFeedback = reviewForms[ass.student_id]?.feedback || ''
+                                    const newFeedback = currentFeedback ? `${currentFeedback}\n\nPlease check your spelling and grammar.` : 'Please check your spelling and grammar.'
+                                    updateReviewForm(ass.student_id, 'feedback', newFeedback)
+                                  }}
+                                  disabled={isReviewingThis}
+                                >
+                                  Check spelling
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    const currentFeedback = reviewForms[ass.student_id]?.feedback || ''
+                                    const newFeedback = currentFeedback ? `${currentFeedback}\n\nTry the stretch task to challenge yourself further!` : 'Try the stretch task to challenge yourself further!'
+                                    updateReviewForm(ass.student_id, 'feedback', newFeedback)
+                                  }}
+                                  disabled={isReviewingThis}
+                                >
+                                  Try stretch task
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="primary"
+                                  size="sm"
+                                  onClick={() => {
+                                    updateReviewForm(ass.student_id, 'feedback', 'Great job! You\'ve demonstrated a good understanding of the topic.')
+                                    updateReviewForm(ass.student_id, 'stars', 4)
+                                  }}
+                                  disabled={isReviewingThis}
+                                >
+                                  Great job + 4⭐
+                                </Button>
+                              </div>
+                            )}
                             <textarea
                               id={`feedback-${ass.student_id}`}
                               className={styles.textarea}

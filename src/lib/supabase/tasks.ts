@@ -62,7 +62,7 @@ export async function listTasksForTeacher(): Promise<{ data: TaskWithClass[] | n
 
 /**
  * List tasks for a student (ONLY tasks explicitly assigned to them via task_assignments)
- * Uses RPC function to avoid RLS recursion issues with nested selects
+ * Uses direct query with nested selects (same pattern as listStudentNextTasks)
  */
 export async function listTasksForStudent(): Promise<{ data: TaskWithStatus[] | null; error: any }> {
   const { data: { user } } = await supabase.auth.getUser()
@@ -71,38 +71,75 @@ export async function listTasksForStudent(): Promise<{ data: TaskWithStatus[] | 
     return { data: null, error: { message: 'Not authenticated' } }
   }
 
-  // Use RPC function to get assigned tasks (avoids RLS recursion)
-  const { data, error } = await supabase.rpc('list_student_tasks')
+  try {
+    // Get student's assignments with task info
+    const { data, error } = await supabase
+      .from('task_assignments')
+      .select(`
+        id,
+        status,
+        stars_awarded,
+        created_at,
+        tasks!inner (
+          id,
+          class_id,
+          created_by,
+          title,
+          instructions,
+          steps,
+          differentiation,
+          success_criteria,
+          due_date,
+          creation_mode,
+          target_skill,
+          target_level,
+          created_at
+        )
+      `)
+      .eq('student_id', user.id)
+      .order('due_date', { foreignTable: 'tasks', ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false })
 
-  if (error) {
-    return { data: null, error }
+    if (error) {
+      return { data: null, error }
+    }
+
+    // Get class names separately (to avoid RLS recursion with nested selects)
+    const classIds = [...new Set((data || []).map((item: any) => item.tasks?.class_id).filter(Boolean))]
+    const { data: classesData } = await supabase
+      .from('classes')
+      .select('id, name')
+      .in('id', classIds)
+
+    const classesMap = new Map((classesData || []).map((c: any) => [c.id, c.name]))
+
+    // Transform to TaskWithStatus format
+    const tasks: TaskWithStatus[] = (data || []).map((item: any) => ({
+      id: item.tasks?.id || '',
+      class_id: item.tasks?.class_id || '',
+      created_by: item.tasks?.created_by || '',
+      title: item.tasks?.title || 'Unknown Task',
+      instructions: item.tasks?.instructions || '',
+      steps: item.tasks?.steps || [],
+      differentiation: item.tasks?.differentiation || {},
+      success_criteria: item.tasks?.success_criteria || [],
+      due_date: item.tasks?.due_date || null,
+      creation_mode: (item.tasks?.creation_mode || 'manual') as 'manual' | 'template' | 'ai',
+      target_skill: item.tasks?.target_skill || null,
+      target_level: item.tasks?.target_level || null,
+      created_at: item.tasks?.created_at || item.created_at,
+      classes: item.tasks?.class_id ? {
+        id: item.tasks.class_id,
+        name: classesMap.get(item.tasks.class_id) || 'Unknown Class',
+      } : undefined,
+      assignmentStatus: item.status as 'not_started' | 'in_progress' | 'submitted' | 'reviewed',
+      starsAwarded: item.stars_awarded || 0,
+    }))
+
+    return { data: tasks, error: null }
+  } catch (err: any) {
+    return { data: null, error: { message: err.message || 'Failed to load student tasks' } }
   }
-
-  // Transform RPC result to TaskWithStatus format
-  // RPC returns: assignment_id, task_id, class_id, class_name, title, due_date, status, stars_awarded, created_at
-  const tasks: TaskWithStatus[] = (data || []).map((item: any) => ({
-    id: item.task_id,
-    class_id: item.class_id,
-    created_by: '', // Not returned by RPC, but not needed for list view
-    title: item.title,
-    instructions: '', // Not returned by RPC, loaded separately on detail page
-    steps: [],
-    differentiation: {},
-    success_criteria: [],
-    due_date: item.due_date,
-    creation_mode: 'manual' as const, // Default, loaded separately on detail page
-    target_skill: item.target_skill || null,
-    target_level: item.target_level || null,
-    created_at: item.created_at,
-    classes: {
-      id: item.class_id,
-      name: item.class_name,
-    },
-    assignmentStatus: item.status as 'not_started' | 'in_progress' | 'submitted' | 'reviewed',
-    starsAwarded: item.stars_awarded || 0,
-  }))
-
-  return { data: tasks, error: null }
 }
 
 /**

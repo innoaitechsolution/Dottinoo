@@ -1,0 +1,166 @@
+/* ============================================================================
+   ACCESSIBILITY THEMES & SETTINGS
+   ============================================================================
+   These styles apply based on data attributes set by student accessibility settings.
+   Applied globally but scoped to avoid affecting teacher UI.
+   ============================================================================ */
+
+/* Color Themes */
+[data-theme="default"] {
+  /* Default theme - no changes */
+}
+
+[data-theme="high-contrast"] {
+  --color-text: #000000;
+  --color-background: #ffffff;
+  --color-primary: #0066cc;
+  --color-border: #000000;
+  --color-card-bg: #ffffff;
+}
+
+[data-theme="high-contrast"] * {
+  color: var(--color-text, #000000) !important;
+  background-color: var(--color-background, #ffffff) !important;
+}
+
+[data-theme="high-contrast"] button,
+[data-theme="high-contrast"] .button {
+  border: 2px solid var(--color-border, #000000) !important;
+  background-color: var(--color-primary, #0066cc) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="pastel"] {
+  --color-text: #4a5568;
+  --color-background: #fef5e7;
+  --color-primary: #a8d5ba;
+  --color-card-bg: #ffffff;
+  --color-border: #e2e8f0;
+}
+
+[data-theme="pastel"] body {
+  background-color: var(--color-background) !important;
+}
+
+[data-theme="pastel"] .container,
+[data-theme="pastel"] .content,
+[data-theme="pastel"] .panel,
+[data-theme="pastel"] .card {
+  background-color: var(--color-card-bg) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dyslexia-friendly"] {
+  --color-text: #2d3748;
+  --color-background: #ffffff;
+  --color-primary: #3182ce;
+  --font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', sans-serif;
+}
+
+[data-theme="dyslexia-friendly"] * {
+  font-family: var(--font-family) !important;
+  letter-spacing: 0.05em !important;
+}
+
+[data-theme="dyslexia-friendly"] p,
+[data-theme="dyslexia-friendly"] span,
+[data-theme="dyslexia-friendly"] div {
+  line-height: 1.8 !important;
+}
+
+/* Font Sizes */
+[data-font-size="small"] {
+  font-size: 0.875rem;
+}
+
+[data-font-size="small"] h1 { font-size: 1.5rem !important; }
+[data-font-size="small"] h2 { font-size: 1.25rem !important; }
+[data-font-size="small"] h3 { font-size: 1.125rem !important; }
+[data-font-size="small"] p, [data-font-size="small"] span, [data-font-size="small"] div { font-size: 0.875rem !important; }
+
+[data-font-size="medium"] {
+  font-size: 1rem;
+}
+
+[data-font-size="large"] {
+  font-size: 1.125rem;
+}
+
+[data-font-size="large"] h1 { font-size: 2.25rem !important; }
+[data-font-size="large"] h2 { font-size: 1.875rem !important; }
+[data-font-size="large"] h3 { font-size: 1.5rem !important; }
+[data-font-size="large"] p, [data-font-size="large"] span, [data-font-size="large"] div { font-size: 1.125rem !important; }
+
+/* Line Spacing */
+[data-line-spacing="normal"] {
+  line-height: 1.5;
+}
+
+[data-line-spacing="relaxed"] {
+  line-height: 1.75;
+}
+
+[data-line-spacing="relaxed"] p,
+[data-line-spacing="relaxed"] div,
+[data-line-spacing="relaxed"] span {
+  line-height: 1.75 !important;
+}
+
+[data-line-spacing="loose"] {
+  line-height: 2;
+}
+
+[data-line-spacing="loose"] p,
+[data-line-spacing="loose"] div,
+[data-line-spacing="loose"] span {
+  line-height: 2 !important;
+}
+
+/* Letter Case - Only apply to content, not inputs */
+[data-letter-case="lowercase"] .content,
+[data-letter-case="lowercase"] p:not(input),
+[data-letter-case="lowercase"] span:not(input),
+[data-letter-case="lowercase"] div:not(input),
+[data-letter-case="lowercase"] h1:not(input),
+[data-letter-case="lowercase"] h2:not(input),
+[data-letter-case="lowercase"] h3:not(input),
+[data-letter-case="lowercase"] label:not(input) {
+  text-transform: lowercase !important;
+}
+
+[data-letter-case="uppercase"] .content,
+[data-letter-case="uppercase"] p:not(input),
+[data-letter-case="uppercase"] span:not(input),
+[data-letter-case="uppercase"] div:not(input),
+[data-letter-case="uppercase"] h1:not(input),
+[data-letter-case="uppercase"] h2:not(input),
+[data-letter-case="uppercase"] h3:not(input),
+[data-letter-case="uppercase"] label:not(input) {
+  text-transform: uppercase !important;
+}
+
+/* Simplified Layout */
+[data-simplified="true"] .quickLinks,
+[data-simplified="true"] .statsSection,
+[data-simplified="true"] .actionHint {
+  display: none;
+}
+
+[data-simplified="true"] .panel,
+[data-simplified="true"] .card {
+  padding: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+[data-simplified="true"] .content {
+  max-width: 100% !important;
+  padding: 1rem !important;
+}
+
+/* Ensure inputs, textareas, and buttons are NOT transformed */
+input,
+textarea,
+button,
+select {
+  text-transform: none !important;
+}

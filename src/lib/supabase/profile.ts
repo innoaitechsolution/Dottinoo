@@ -4,11 +4,20 @@ import { supabase } from './client'
 
 export type ProfileRole = 'student' | 'teacher' | 'admin' | 'external'
 
+export interface UIPreferences {
+  colorTheme?: 'default' | 'high-contrast' | 'pastel' | 'dyslexia-friendly'
+  fontSize?: 'small' | 'medium' | 'large'
+  lineSpacing?: 'normal' | 'relaxed' | 'loose'
+  letterCase?: 'normal' | 'lowercase' | 'uppercase'
+  simplifiedLayout?: boolean
+}
+
 export interface Profile {
   id: string
   role: ProfileRole
   full_name: string | null
   created_at: string
+  ui_preferences?: UIPreferences | null
 }
 
 export interface CreateProfileParams {

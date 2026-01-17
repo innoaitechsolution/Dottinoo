@@ -155,6 +155,7 @@ export interface ClassStudent {
   id: string
   full_name: string | null
   role: string
+  support_needs_tags?: string[] | null
 }
 
 /**
@@ -186,7 +187,8 @@ export async function getClassStudents(classId: string): Promise<{ data: ClassSt
       profiles!inner (
         id,
         full_name,
-        role
+        role,
+        support_needs_tags
       )
     `)
     .eq('class_id', classId)
@@ -201,6 +203,7 @@ export async function getClassStudents(classId: string): Promise<{ data: ClassSt
       id: item.profiles.id,
       full_name: item.profiles.full_name,
       role: item.profiles.role,
+      support_needs_tags: item.profiles.support_needs_tags || null,
     }))
     .filter((s: ClassStudent) => s.role === 'student' || s.role === 'external')
 
