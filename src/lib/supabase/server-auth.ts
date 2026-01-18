@@ -1,18 +1,20 @@
 /**
  * Server-side authentication helpers for API routes
+ * 
+ * NOTE: This file is server-only and should never be imported in client components.
+ * It uses requireEnv() which throws at module load time if env vars are missing.
  */
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { ProfileRole } from './profile'
+import { requireEnv, getEnv } from '../env'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
-}
+// Require these at module load time (server-side only)
+// This ensures we fail fast with a clear error if env vars are missing
+const supabaseUrl = requireEnv('NEXT_PUBLIC_SUPABASE_URL')
+const supabaseAnonKey = requireEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
 
 export interface AuthResult {
   userId: string | null
@@ -97,7 +99,7 @@ export async function getServerAuth(request?: NextRequest): Promise<AuthResult> 
 
     // Get profile to check role
     // Use service role if available (bypasses RLS), otherwise use anon key (RLS should allow own profile read)
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const serviceKey = getEnv('SUPABASE_SERVICE_ROLE_KEY')
     const profileClient = serviceKey
       ? createClient(supabaseUrl, serviceKey, {
           auth: { autoRefreshToken: false, persistSession: false },

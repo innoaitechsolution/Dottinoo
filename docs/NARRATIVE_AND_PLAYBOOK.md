@@ -1,8 +1,8 @@
-# Dottinoo - Award Narrative + Demo Playbook + Checklists
+# Dottinoo - Narrative + Demo Playbook + Checklists
 
-## PART 3 — AWARD NARRATIVE + DEMO PLAYBOOK + CHECKLISTS
+## PART 3 — NARRATIVE + DEMO PLAYBOOK + CHECKLISTS
 
-### A. Award Narrative Variants
+### A. Narrative Variants
 
 #### Variant 1: Very Short (120-150 words)
 
@@ -63,9 +63,7 @@ Feedback cycles are another bottleneck. Students submit work, teachers review it
 Dottinoo offers teachers three ways to create tasks, each suited to different needs and time constraints:
 
 1. **Manual Mode:** For experienced teachers who want full control, manual mode provides a comprehensive form for task creation, including title, instructions, steps, differentiation (easier/standard/stretch), success criteria, and assignment targeting.
-
 2. **Template Mode:** Eight pre-built task templates (essay, research project, presentation, debate, creative writing, problem-solving, reflection, and portfolio) pre-fill the task form. Teachers select a template, customize it, and assign it in minutes. Templates include built-in differentiation and success criteria aligned to common learning objectives.
-
 3. **AI-Assisted Mode:** Powered by Google's Gemini AI, this mode generates structured task drafts from a brief description. The AI considers the subject, time estimate, and—critically—the support needs of selected students. It produces a complete task structure that teachers can review, edit, and assign. If AI is unavailable or disabled, the system gracefully falls back to mock responses, ensuring the workflow never breaks.
 
 **Inclusion Built-In: Student Accessibility**
@@ -132,18 +130,21 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 #### 10-Minute Demo Plan (Minute-by-Minute)
 
 **Minute 0-1: Opening & Landing Page**
+
 - Show landing page: "Tasks that adapt to every learner"
 - Highlight: "Built for UK classrooms, designed for ages 14-24"
 - Show feature chips: "Manual • Templates • AI drafts — plus accessibility settings and reporting"
 - Click "Get started" → show auth entry (don't login yet)
 
 **Minute 1-2: Teacher Login & Dashboard**
+
 - Login as teacher (pre-created demo account)
 - Show `/app/teacher` dashboard
 - Point out role badge and email (demo clarity)
 - Show quick links: Classes, Tasks, Reports
 
 **Minute 2-3: Create Class & Task (Template Mode)**
+
 - Go to Classes → Create Class → "Demo Class 2024"
 - Copy invite code (show it)
 - Go to Tasks → Create Task
@@ -153,12 +154,14 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 - Assign to class → Create Task
 
 **Minute 3-4: AI Task Creation (If Time)**
+
 - Create another task → Switch to "AI Assist"
 - Enter brief: "Create a task about climate change for 30 minutes"
 - Select students (if available) → Generate Draft
 - Show AI-generated content → edit if needed → save
 
 **Minute 4-5: Student Experience**
+
 - Open incognito/private window (or switch account)
 - Login as student (pre-created)
 - Show `/app/student` dashboard
@@ -171,6 +174,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
   - Save settings
 
 **Minute 5-6: Student Submission & AI Help**
+
 - Open task detail
 - Show AI Help section:
   - Click "Simplify" → show rewritten instructions (don't overwrite original)
@@ -180,6 +184,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 - Submit task
 
 **Minute 6-7: Teacher Review**
+
 - Switch back to teacher account
 - Go to Tasks → open task with submission
 - Show Review Queue
@@ -189,6 +194,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 - Award stars (4) → Review
 
 **Minute 7-8: Reports**
+
 - Go to Reports
 - Select class
 - Show summary: tasks, assignments, submissions, reviews, stars
@@ -196,11 +202,13 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 - Click "Export CSV" → show download (or explain it downloads)
 
 **Minute 8-9: Differentiation & Skills (Optional)**
+
 - Go to Classes → Manage Students
 - Show student skill profiles (if time)
 - Show task differentiation (easier/standard/stretch) in task detail
 
 **Minute 9-10: Q&A & Closing**
+
 - Answer questions
 - Highlight key differentiators:
   - Three-track task creation (Manual/Template/AI)
@@ -213,6 +221,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 #### Plan B: If AI is Disabled
 
 **Substitute AI sections with:**
+
 - **Task Creation:** Focus on Template mode (show multiple templates)
 - **Review:** Skip AI feedback suggestions, emphasize quick feedback buttons
 - **Student Help:** Show AI help section but explain it's disabled → show mock/fallback behavior
@@ -220,6 +229,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 **Key Message:** "AI enhances the experience but isn't required. The platform works fully with manual and template modes."
 
 **Revised Timeline:**
+
 - **Minute 0-2:** Same (landing, login, dashboard)
 - **Minute 2-4:** Create class, show Template mode (emphasize 8 templates available)
 - **Minute 4-5:** Show Manual mode (full control)
@@ -233,6 +243,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 #### Plan C: If Network Issues
 
 **Offline-Friendly Demo Path:**
+
 1. Pre-load pages (teacher dashboard, student dashboard)
 2. Show static screenshots of:
    - Task creation form (template selected)
@@ -245,6 +256,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 **Key Message:** "The platform is cloud-based, but we have offline-friendly workflows and can demonstrate core features even with limited connectivity."
 
 **Alternative Approach:**
+
 - Use local development environment (if available)
 - Show code structure and architecture
 - Explain data model and security
@@ -257,6 +269,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 **Critical Paths:**
 
 **Teacher Flow (5 minutes):**
+
 - [ ] Login as teacher → lands on `/app/teacher`
 - [ ] Create class → get invite code
 - [ ] Create task (Manual) → assign to class → save
@@ -267,6 +280,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 - [ ] Reports → select class → view stats → export CSV
 
 **Student Flow (5 minutes):**
+
 - [ ] Login as student → lands on `/app/student`
 - [ ] Join class (invite code from teacher)
 - [ ] View My Tasks → see assigned task
@@ -278,18 +292,21 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 - [ ] View feedback and stars (after teacher reviews)
 
 **AI Checks (3 minutes):**
+
 - [ ] AI task draft: Generate → verify response (or mock fallback)
 - [ ] AI feedback: Click button → verify suggestions (or mock fallback)
 - [ ] AI rewrite: Click "Simplify" → verify rewritten text
 - [ ] AI hints: Click "Next step" → verify hint (with guardrails)
 
 **Reports Export (2 minutes):**
+
 - [ ] Reports page loads
 - [ ] Select class → stats display
 - [ ] Per-student table shows data
 - [ ] CSV export downloads (or shows download prompt)
 
 **Accessibility (2 minutes):**
+
 - [ ] Settings save to database
 - [ ] Visual changes apply immediately
 - [ ] Settings persist after refresh
@@ -302,30 +319,31 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 **Quantitative Metrics:**
 
 1. **Teacher Time Saved:**
+
    - Time to create task: Manual vs Template vs AI
    - Time to review submission: With quick feedback vs without
    - Total time saved per week/month
-
 2. **Completion Rates:**
+
    - % of assigned tasks submitted
    - % of submissions reviewed within 24/48 hours
    - Average time from assignment to submission
-
 3. **Submission/Review Cycle Time:**
+
    - Average time from submission to review
    - Average time from review to student viewing feedback
-
 4. **Accessibility Settings Usage:**
+
    - % of students who customize settings
    - Most common settings (themes, font sizes)
    - Settings changed over time (adaptation)
-
 5. **AI Feature Adoption:**
+
    - % of tasks created via AI mode
    - % of reviews using AI feedback suggestions
    - % of students using AI help features
-
 6. **Task Creation Mode Distribution:**
+
    - Manual: X%
    - Template: X%
    - AI: X%
@@ -333,6 +351,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 **Qualitative Feedback Questions:**
 
 **For Teachers:**
+
 1. How does Dottinoo compare to your previous task creation method?
 2. Which task creation mode do you prefer and why?
 3. How has the review workflow changed your feedback frequency?
@@ -341,6 +360,7 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 6. Would you recommend Dottinoo to other teachers? Why/why not?
 
 **For Students:**
+
 1. How easy is it to use Dottinoo?
 2. Do the accessibility settings help you?
 3. How useful are the AI help features?
@@ -348,11 +368,13 @@ While our current MVP focuses on task creation, assignment, submission, and revi
 5. What would make Dottinoo better for you?
 
 **For School Administrators:**
+
 1. How does the reporting help you understand student progress?
 2. What additional metrics would be useful?
 3. How does Dottinoo fit into your school's digital strategy?
 
 **Success Criteria (Trial):**
+
 - Teacher time saved: ≥30% reduction in task creation time
 - Review cycle: ≥50% of submissions reviewed within 24 hours
 - Student satisfaction: ≥70% positive feedback on accessibility features
