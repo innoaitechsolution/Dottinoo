@@ -86,6 +86,17 @@ export default function TaskDetailPage() {
   // Teacher review forms (indexed by student_id)
   const [reviewForms, setReviewForms] = useState<Record<string, { feedback: string; stars: number }>>({})
   const [isReviewing, setIsReviewing] = useState<Record<string, boolean>>({})
+  
+  // AI features state
+  const [aiFeedbackLoading, setAiFeedbackLoading] = useState<Record<string, boolean>>({})
+  const [aiFeedbackError, setAiFeedbackError] = useState<Record<string, string>>({})
+  const [aiFeedbackSuggestions, setAiFeedbackSuggestions] = useState<Record<string, any>>({})
+  
+  // Student AI help state
+  const [aiHelpLoading, setAiHelpLoading] = useState<Record<string, boolean>>({})
+  const [aiHelpError, setAiHelpError] = useState<Record<string, string>>({})
+  const [aiHelpResults, setAiHelpResults] = useState<Record<string, any>>({})
+  const [simplifiedInstructions, setSimplifiedInstructions] = useState<string | null>(null)
 
   useEffect(() => {
     const loadData = async () => {
@@ -274,6 +285,133 @@ export default function TaskDetailPage() {
     }))
   }
 
+  // AI Feedback Draft Handler (Teacher)
+  const handleAIFeedbackDraft = async (studentId: string, submission: Submission | null) => {
+    if (!submission || !task) return
+
+    setAiFeedbackLoading(prev => ({ ...prev, [studentId]: true }))
+    setAiFeedbackError(prev => ({ ...prev, [studentId]: '' }))
+
+    try {
+      // Get session token for auth
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
+      const response = await fetch('/api/ai/feedback-draft', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          taskTitle: task.title,
+          taskInstructions: task.instructions,
+          successCriteria: task.success_criteria,
+          studentSubmission: submission.content,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to generate feedback suggestions')
+      }
+
+      const data = await response.json()
+      setAiFeedbackSuggestions(prev => ({ ...prev, [studentId]: data }))
+    } catch (err: any) {
+      setAiFeedbackError(prev => ({ ...prev, [studentId]: err.message || 'Failed to load AI suggestions' }))
+    } finally {
+      setAiFeedbackLoading(prev => ({ ...prev, [studentId]: false }))
+    }
+  }
+
+  const insertAIFeedback = (studentId: string, feedbackText: string) => {
+    const currentFeedback = reviewForms[studentId]?.feedback || ''
+    const newFeedback = currentFeedback ? `${currentFeedback}\n\n${feedbackText}` : feedbackText
+    updateReviewForm(studentId, 'feedback', newFeedback)
+  }
+
+  // AI Help Handlers (Student)
+  const handleAIRewrite = async (mode: 'simplify' | 'bullet_points' | 'dyslexia_friendly' | 'shorten') => {
+    if (!task) return
+
+    const key = `rewrite-${mode}`
+    setAiHelpLoading(prev => ({ ...prev, [key]: true }))
+    setAiHelpError(prev => ({ ...prev, [key]: '' }))
+
+    try {
+      // Get session token for auth
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
+      const response = await fetch('/api/ai/rewrite', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          text: task.instructions,
+          mode,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to rewrite instructions')
+      }
+
+      const data = await response.json()
+      if (mode === 'simplify') {
+        setSimplifiedInstructions(data.rewrittenText)
+      } else {
+        setAiHelpResults(prev => ({ ...prev, [key]: data.rewrittenText }))
+      }
+    } catch (err: any) {
+      setAiHelpError(prev => ({ ...prev, [key]: err.message || 'Failed to rewrite' }))
+    } finally {
+      setAiHelpLoading(prev => ({ ...prev, [key]: false }))
+    }
+  }
+
+  const handleAIHint = async (requestType: 'next_step' | 'checklist' | 'questions') => {
+    if (!task) return
+
+    setAiHelpLoading(prev => ({ ...prev, [requestType]: true }))
+    setAiHelpError(prev => ({ ...prev, [requestType]: '' }))
+
+    try {
+      // Get session token for auth
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
+      const response = await fetch('/api/ai/hint', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          taskContext: `${task.title}: ${task.instructions}`,
+          successCriteria: task.success_criteria,
+          requestType,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to generate hints')
+      }
+
+      const data = await response.json()
+      setAiHelpResults(prev => ({ ...prev, [requestType]: data }))
+    } catch (err: any) {
+      setAiHelpError(prev => ({ ...prev, [requestType]: err.message || 'Failed to load hints' }))
+    } finally {
+      setAiHelpLoading(prev => ({ ...prev, [requestType]: false }))
+    }
+  }
+
   if (isLoading) {
     return (
       <div className={styles.container}>
@@ -375,6 +513,147 @@ export default function TaskDetailPage() {
             </section>
           )}
         </div>
+
+        {/* Student View: AI Help Section */}
+        {!isTeacher && (
+          <div className={styles.section} style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--color-bg-blue-50)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-bg-blue-100)' }}>
+            <h2 className={styles.sectionTitle}>AI Help</h2>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-soft)', marginBottom: '1rem' }}>
+              Hints guide you — they don't do the work for you.
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Simplify Instructions */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Simplify Instructions</label>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleAIRewrite('simplify')}
+                    disabled={aiHelpLoading['rewrite-simplify']}
+                    isLoading={aiHelpLoading['rewrite-simplify']}
+                  >
+                    Simplify
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleAIRewrite('bullet_points')}
+                    disabled={aiHelpLoading['rewrite-bullet_points']}
+                    isLoading={aiHelpLoading['rewrite-bullet_points']}
+                  >
+                    Bullet Points
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleAIRewrite('dyslexia_friendly')}
+                    disabled={aiHelpLoading['rewrite-dyslexia_friendly']}
+                    isLoading={aiHelpLoading['rewrite-dyslexia_friendly']}
+                  >
+                    Dyslexia-Friendly
+                  </Button>
+                </div>
+                {aiHelpError['rewrite-simplify'] && (
+                  <p style={{ fontSize: '0.875rem', color: 'var(--color-energy-orange)', marginTop: '0.5rem' }}>
+                    {aiHelpError['rewrite-simplify']}
+                  </p>
+                )}
+                {simplifiedInstructions && (
+                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'var(--color-white)', borderRadius: 'var(--radius-md)' }}>
+                    <p style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Simplified Version:</p>
+                    <p style={{ fontSize: '0.875rem' }}>{simplifiedInstructions}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Get Hints */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Get a Hint</label>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleAIHint('next_step')}
+                    disabled={aiHelpLoading['next_step']}
+                    isLoading={aiHelpLoading['next_step']}
+                  >
+                    Next Step
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleAIHint('checklist')}
+                    disabled={aiHelpLoading['checklist']}
+                    isLoading={aiHelpLoading['checklist']}
+                  >
+                    Checklist
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleAIHint('questions')}
+                    disabled={aiHelpLoading['questions']}
+                    isLoading={aiHelpLoading['questions']}
+                  >
+                    Questions
+                  </Button>
+                </div>
+                {(aiHelpError['next_step'] || aiHelpError['checklist'] || aiHelpError['questions']) && (
+                  <p style={{ fontSize: '0.875rem', color: 'var(--color-energy-orange)', marginTop: '0.5rem' }}>
+                    {aiHelpError['next_step'] || aiHelpError['checklist'] || aiHelpError['questions']}
+                  </p>
+                )}
+                {(aiHelpResults['next_step'] || aiHelpResults['checklist'] || aiHelpResults['questions']) && (
+                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'var(--color-white)', borderRadius: 'var(--radius-md)' }}>
+                    {aiHelpResults['next_step']?.refusal && (
+                      <p style={{ fontSize: '0.875rem', color: 'var(--color-energy-orange)', marginBottom: '0.5rem', fontStyle: 'italic' }}>
+                        {aiHelpResults['next_step'].refusal}
+                      </p>
+                    )}
+                    {aiHelpResults['next_step']?.hints && aiHelpResults['next_step'].hints.length > 0 && (
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem' }}>Hints:</p>
+                        <ul style={{ fontSize: '0.875rem', paddingLeft: '1.25rem' }}>
+                          {aiHelpResults['next_step'].hints.map((hint: string, idx: number) => (
+                            <li key={idx} style={{ marginBottom: '0.25rem' }}>{hint}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {aiHelpResults['checklist']?.checklist && aiHelpResults['checklist'].checklist.length > 0 && (
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem' }}>Checklist:</p>
+                        <ul style={{ fontSize: '0.875rem', paddingLeft: '1.25rem' }}>
+                          {aiHelpResults['checklist'].checklist.map((item: string, idx: number) => (
+                            <li key={idx} style={{ marginBottom: '0.25rem' }}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {aiHelpResults['questions']?.questions && aiHelpResults['questions'].questions.length > 0 && (
+                      <div>
+                        <p style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem' }}>Questions to Consider:</p>
+                        <ul style={{ fontSize: '0.875rem', paddingLeft: '1.25rem' }}>
+                          {aiHelpResults['questions'].questions.map((q: string, idx: number) => (
+                            <li key={idx} style={{ marginBottom: '0.25rem' }}>{q}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Student View: Submission Form */}
         {!isTeacher && (
@@ -605,6 +884,50 @@ export default function TaskDetailPage() {
                                 >
                                   Great job + 4⭐
                                 </Button>
+                                <Button
+                                  type="button"
+                                  variant="energy"
+                                  size="sm"
+                                  onClick={() => handleAIFeedbackDraft(ass.student_id, submissionsMap[ass.id])}
+                                  disabled={isReviewingThis || aiFeedbackLoading[ass.student_id] || !submissionsMap[ass.id]}
+                                  isLoading={aiFeedbackLoading[ass.student_id]}
+                                >
+                                  🤖 AI feedback suggestions
+                                </Button>
+                              </div>
+                            )}
+                            {aiFeedbackError[ass.student_id] && (
+                              <div className={styles.error} style={{ marginBottom: '0.5rem', fontSize: '0.875rem' }}>
+                                {aiFeedbackError[ass.student_id]}
+                              </div>
+                            )}
+                            {aiFeedbackSuggestions[ass.student_id] && (
+                              <div style={{ marginBottom: '0.75rem', padding: '0.75rem', background: 'var(--color-bg-blue-50)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-bg-blue-100)' }}>
+                                <p style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>AI Suggestions:</p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                  {aiFeedbackSuggestions[ass.student_id].options?.map((option: any, idx: number) => (
+                                    <Button
+                                      key={idx}
+                                      type="button"
+                                      variant="secondary"
+                                      size="sm"
+                                      onClick={() => {
+                                        insertAIFeedback(ass.student_id, option.text)
+                                        if (aiFeedbackSuggestions[ass.student_id].starsSuggestion !== undefined) {
+                                          updateReviewForm(ass.student_id, 'stars', aiFeedbackSuggestions[ass.student_id].starsSuggestion)
+                                        }
+                                      }}
+                                      disabled={isReviewingThis}
+                                    >
+                                      {option.title}: {option.text.substring(0, 50)}...
+                                    </Button>
+                                  ))}
+                                  {aiFeedbackSuggestions[ass.student_id].nextStep && (
+                                    <p style={{ fontSize: '0.875rem', fontStyle: 'italic', marginTop: '0.25rem' }}>
+                                      Next step: {aiFeedbackSuggestions[ass.student_id].nextStep}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             )}
                             <textarea
