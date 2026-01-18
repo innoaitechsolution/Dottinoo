@@ -1,7 +1,9 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import Button from './Button'
 import LandingNavbar from './navigation/LandingNavbar'
 import styles from './Landing.module.css'
@@ -9,16 +11,72 @@ import styles from './Landing.module.css'
 export default function Landing() {
   const router = useRouter()
   const isDemoEnabled = process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === 'true'
+  
+  // Refs for scroll animations
+  const valueCardsRef = useRef<HTMLElement>(null)
+  const howItWorksRef = useRef<HTMLElement>(null)
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    // IntersectionObserver for scroll reveal animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -100px 0px',
+      threshold: 0.1,
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setVisibleSections((prev) => new Set(prev).add(entry.target.id))
+        }
+      })
+    }, observerOptions)
+
+    if (valueCardsRef.current) {
+      valueCardsRef.current.id = 'value-cards'
+      observer.observe(valueCardsRef.current)
+    }
+    if (howItWorksRef.current) {
+      howItWorksRef.current.id = 'how-it-works-section'
+      observer.observe(howItWorksRef.current)
+    }
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   return (
     <div className={styles.container}>
+      <div className={styles.backgroundBlobs} aria-hidden="true">
+        <div className={styles.blob1}></div>
+        <div className={styles.blob2}></div>
+        <div className={styles.blob3}></div>
+      </div>
       <LandingNavbar />
       {/* Hero Section */}
       <section className={styles.hero}>
+        <div className={styles.heroMascot}>
+          <Image
+            src="/brand/dottinoo-logo.png"
+            alt="Dottinoo mascot"
+            width={80}
+            height={80}
+            className={styles.mascotImage}
+          />
+        </div>
         <h1 className={styles.headline}>Tasks that adapt to every learner</h1>
+        <div className={styles.heroBadges}>
+          <span className={styles.badge}>Built for UK classrooms</span>
+          <span className={styles.badge}>Designed for ages 14–24</span>
+        </div>
         <p className={styles.subheadline}>
           Create personalized learning experiences with manual, template, or AI-generated tasks.
         </p>
+        <div className={styles.speechBubble}>
+          <p>Hi! I'm Dottinoo — I help teachers tailor tasks for every learner.</p>
+        </div>
         <div className={styles.ctaGroup}>
           <Button
             variant="primary"
@@ -43,6 +101,15 @@ export default function Landing() {
             </Button>
           </div>
         </div>
+        <div className={styles.proofLine}>
+          Manual • Templates • AI drafts — plus accessibility settings and reporting.
+        </div>
+        <div className={styles.featureChips}>
+          <span className={styles.featureChip}>Accessibility modes</span>
+          <span className={styles.featureChip}>Quick feedback + stars</span>
+          <span className={styles.featureChip}>Class reports (CSV)</span>
+          <span className={styles.featureChip}>Differentiation</span>
+        </div>
         <p className={styles.signInLink}>
           Already have an account?{' '}
           <Link href="/login" className={styles.link}>
@@ -52,7 +119,10 @@ export default function Landing() {
       </section>
 
       {/* Value Cards */}
-      <section className={styles.valueCards}>
+      <section 
+        ref={valueCardsRef}
+        className={`${styles.valueCards} ${visibleSections.has('value-cards') ? styles.visible : ''}`}
+      >
         <div className={styles.valueCard}>
           <h3 className={styles.valueCardTitle}>For Teachers</h3>
           <p className={styles.valueCardText}>
@@ -74,7 +144,11 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className={styles.howItWorks}>
+      <section 
+        id="how-it-works" 
+        ref={howItWorksRef}
+        className={`${styles.howItWorks} ${visibleSections.has('how-it-works-section') ? styles.visible : ''}`}
+      >
         <h2 className={styles.sectionTitle}>How it works</h2>
         <div className={styles.steps}>
           <div className={styles.step}>
@@ -133,6 +207,10 @@ export default function Landing() {
             <Link href="/terms" className={styles.footerLink}>
               Terms
             </Link>
+            <span className={styles.footerSeparator}>•</span>
+            <a href="mailto:innoaitechsolution@gmail.com" className={styles.footerLink}>
+              Contact
+            </a>
           </div>
           <div className={styles.footerAttribution}>
             Dottinoo is a product by InnoAl Tech Solutions.
