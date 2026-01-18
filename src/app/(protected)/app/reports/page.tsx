@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase/client'
 import { getMyProfile, Profile } from '@/lib/supabase/profile'
 import { listMyClasses, Class } from '@/lib/supabase/classes'
 import Button from '@/components/Button'
+import BackButton from '@/components/BackButton'
 import styles from '../page.module.css'
 
 interface ClassReport {
@@ -185,9 +186,7 @@ export default function ReportsPage() {
       <div className={styles.content}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <h1 className={styles.title}>Reports</h1>
-          <Button variant="secondary" onClick={() => router.push('/app/teacher')}>
-            ← Back to Dashboard
-          </Button>
+          <BackButton />
         </div>
 
         <div className={styles.panel} style={{ marginBottom: '1.5rem' }}>

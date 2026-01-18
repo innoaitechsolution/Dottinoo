@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { signIn, signOut } from '@/lib/supabase/auth'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
 import Button from '@/components/Button'
@@ -52,16 +53,29 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout>
-        <div className={styles.logoSection}>
-          <Image
-            src="/brand/dottinoo-logo.png"
-            alt="Dottinoo logo"
-            width={64}
-            height={64}
-            className={styles.logo}
-          />
-        </div>
+    <>
+      <div className={styles.backButtonContainer}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => router.push('/')}
+          className={styles.backButton}
+        >
+          ← Back
+        </Button>
+      </div>
+      <AuthLayout>
+        <Link href="/" className={styles.logoLink}>
+          <div className={styles.logoSection}>
+            <Image
+              src="/brand/dottinoo-logo.png"
+              alt="Dottinoo logo"
+              width={64}
+              height={64}
+              className={styles.logo}
+            />
+          </div>
+        </Link>
         <h1 className={styles.title}>Welcome Back</h1>
         <p className={styles.subtitle}>Sign in to continue your learning journey</p>
 
@@ -101,7 +115,8 @@ export default function LoginPage() {
             Sign up
           </a>
         </p>
-    </AuthLayout>
+      </AuthLayout>
+    </>
   )
 }
 

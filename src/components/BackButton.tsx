@@ -1,11 +1,13 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ButtonHTMLAttributes } from 'react'
+import { getMyProfile } from '@/lib/supabase/profile'
 import styles from './BackButton.module.css'
 
 interface BackButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
-  fallbackHref: string
+  fallbackHref?: string
   label?: string
 }
 
@@ -16,6 +18,29 @@ export default function BackButton({
   ...props
 }: BackButtonProps) {
   const router = useRouter()
+  const [roleBasedFallback, setRoleBasedFallback] = useState<string>('/app')
+
+  useEffect(() => {
+    // Auto-detect role-based fallback if not provided
+    if (!fallbackHref) {
+      const detectFallback = async () => {
+        try {
+          const { data: profile } = await getMyProfile()
+          if (profile) {
+            if (profile.role === 'teacher' || profile.role === 'admin') {
+              setRoleBasedFallback('/app/teacher')
+            } else if (profile.role === 'student' || profile.role === 'external') {
+              setRoleBasedFallback('/app/student')
+            }
+          }
+        } catch (error) {
+          // Fallback to /app if profile fetch fails
+          setRoleBasedFallback('/app')
+        }
+      }
+      detectFallback()
+    }
+  }, [fallbackHref])
 
   const handleClick = () => {
     // Try to go back in history if possible
@@ -24,7 +49,7 @@ export default function BackButton({
     if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back()
     } else {
-      router.push(fallbackHref)
+      router.push(fallbackHref || roleBasedFallback)
     }
   }
 

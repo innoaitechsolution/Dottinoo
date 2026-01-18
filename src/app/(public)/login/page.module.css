@@ -1,3 +1,24 @@
+.backButtonContainer {
+  max-width: 500px;
+  margin: 0 auto var(--spacing-md);
+  padding: 0 var(--spacing-lg);
+}
+
+.backButton {
+  margin-bottom: 0;
+}
+
+.logoLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: opacity 0.2s ease;
+}
+
+.logoLink:hover {
+  opacity: 0.8;
+}
+
 .logoSection {
   display: flex;
   justify-content: center;

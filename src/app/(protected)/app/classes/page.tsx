@@ -265,7 +265,7 @@ export default function ClassesPage() {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <BackButton fallbackHref="/app" className={styles.backButton} />
+        <BackButton className={styles.backButton} />
         <h1 className={styles.title}>
           {isTeacher ? 'My Classes' : 'Joined Classes'}
         </h1>

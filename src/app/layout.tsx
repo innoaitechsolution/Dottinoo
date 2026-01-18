@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import './accessibility.css'
-import Header from '@/components/Header'
+import ConditionalHeader from '@/components/ConditionalHeader'
 
 export const metadata: Metadata = {
   title: 'Dottinoo - Education Platform',
@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
+        <ConditionalHeader />
         <main>{children}</main>
       </body>
     </html>
