@@ -164,7 +164,7 @@ Stars suggestion should be 0-5. Be encouraging but honest.`
       options: [
         { title: 'Encouraging', text: 'Good work on completing this task.' },
         { title: 'Constructive', text: 'Consider adding more detail to strengthen your response.' },
-        { title: 'Next Steps', text: 'Continue building on what you've learned.' },
+        { title: 'Next Steps', text: 'Continue building on what you have learned.' },
       ],
       nextStep: 'Review the success criteria and identify areas to expand.',
       starsSuggestion: 3,
