@@ -6,7 +6,6 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest } from 'next/server'
-import { cookies } from 'next/headers'
 import { ProfileRole } from './profile'
 
 // Local helper to require env vars (throws if missing)
@@ -28,7 +27,7 @@ export interface AuthResult {
 
 /**
  * Get authenticated user and profile from server-side API route
- * Uses cookies from request (Supabase stores session in cookies) or Authorization header
+ * Uses Authorization header token for authentication (cookie fallback disabled)
  */
 export async function getServerAuth(request?: NextRequest): Promise<AuthResult> {
   try {
@@ -46,55 +45,9 @@ export async function getServerAuth(request?: NextRequest): Promise<AuthResult> 
         user = userData
       }
     } else {
-      // Fallback to cookies
-      let cookieStore: any = null
-      try {
-        cookieStore = await cookies()
-      } catch {
-        // If cookies() fails, try to get from request headers
-        if (request) {
-          const cookieHeader = request.headers.get('cookie') || ''
-          const cookieMap = Object.fromEntries(
-            cookieHeader.split('; ').map(c => {
-              const [key, ...values] = c.split('=')
-              return [key, decodeURIComponent(values.join('='))]
-            })
-          )
-          cookieStore = {
-            get: (name: string) => ({ value: cookieMap[name] || null }),
-          }
-        }
-      }
-
-      if (!cookieStore) {
-        return { userId: null, role: null, email: null }
-      }
-
-      // Create Supabase client with cookie access
-      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set() {
-            // No-op for server-side
-          },
-          remove() {
-            // No-op for server-side
-          },
-        },
-      })
-
-      const {
-        data: { user: userData },
-        error: userError,
-      } = await supabase.auth.getUser()
-
-      if (userError || !userData) {
-        return { userId: null, role: null, email: null }
-      }
-
-      user = userData
+      // Cookie fallback disabled because @supabase/supabase-js createClient doesn't support cookie access
+      // Only token-based auth via Authorization header is supported
+      return { userId: null, role: null, email: null }
     }
 
     if (!user) {
