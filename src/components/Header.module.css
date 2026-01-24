@@ -12,6 +12,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logoLink {
@@ -62,5 +65,27 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-deep-navy);
   margin: 0;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.navLink {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-deep-navy);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.navLink:hover {
+  color: var(--color-primary-blue);
 }
 

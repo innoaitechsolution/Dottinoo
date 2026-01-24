@@ -52,14 +52,14 @@ export default function Header() {
     if (isLoggedIn) {
       router.push('/app')
     } else {
-      router.push('/login')
+      router.push('/')
     }
   }
 
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        <Link href={isLoggedIn ? '/app' : '/login'} className={styles.logoLink} onClick={handleLogoClick}>
+        <Link href={isLoggedIn ? '/app' : '/'} className={styles.logoLink} onClick={handleLogoClick}>
           <div className={styles.logoContainer}>
             <div className={styles.logoWrapper}>
               {!imageError ? (
@@ -80,6 +80,13 @@ export default function Header() {
             <h1 className={styles.brandName}>Dottinoo</h1>
           </div>
         </Link>
+        {!isLoggedIn && (
+          <div className={styles.navLinks}>
+            <Link href="/about" className={styles.navLink}>
+              About
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   )

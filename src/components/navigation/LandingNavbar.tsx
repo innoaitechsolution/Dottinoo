@@ -31,6 +31,9 @@ export default function LandingNavbar() {
           </div>
         </Link>
         <div className={styles.navLinks}>
+          <Link href="/about" className={styles.navLink}>
+            About
+          </Link>
           <button
             type="button"
             onClick={scrollToHowItWorks}
