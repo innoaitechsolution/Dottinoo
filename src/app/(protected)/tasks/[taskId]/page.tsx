@@ -343,7 +343,9 @@ export default function TaskDetailPage() {
             </section>
           )}
 
-          {task.differentiation && (
+          {/* Differentiation: Teacher-only in MVP to avoid confusion/stigma for students.
+              Teachers use this for planning; students receive guidance directly from teachers. */}
+          {isTeacher && task.differentiation && (
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Differentiation</h2>
               <div className={styles.differentiation}>
