@@ -120,3 +120,41 @@
   color: var(--color-deep-navy);
 }
 
+@media (max-width: 768px) {
+  .title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .logoBadge {
+    width: 80px;
+    height: 80px;
+  }
+
+  .logo {
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: var(--font-size-xl);
+  }
+
+  .subtitle {
+    font-size: var(--font-size-sm);
+  }
+
+  .logoBadge {
+    width: 72px;
+    height: 72px;
+  }
+
+  .logo {
+    height: 48px;
+  }
+
+  .buttonGroup {
+    gap: var(--spacing-sm);
+  }
+}
+

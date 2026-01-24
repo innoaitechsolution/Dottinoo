@@ -280,6 +280,38 @@
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .section {
+    padding: var(--spacing-lg);
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .classCard {
+    padding: var(--spacing-md);
+  }
+
+  .className {
+    font-size: var(--font-size-base);
+  }
+
+  .skillsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .prefsGrid {
+    grid-template-columns: 1fr;
+  }
+
   .tableHeader,
   .tableRow {
     grid-template-columns: 150px repeat(5, 1fr);
@@ -289,6 +321,72 @@
   
   .tableCell {
     min-height: 36px;
+  }
+
+  .studentsTable {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tableHeader,
+  .tableRow {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--spacing-md);
+  }
+
+  .title {
+    font-size: var(--font-size-xl);
+  }
+
+  .section {
+    padding: var(--spacing-md);
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-base);
+  }
+
+  .classCard {
+    padding: var(--spacing-sm);
+  }
+
+  .className {
+    font-size: var(--font-size-sm);
+  }
+
+  .code {
+    font-size: var(--font-size-sm);
+  }
+
+  .inviteCode {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .studentCard {
+    padding: var(--spacing-sm);
+  }
+
+  .studentName {
+    font-size: var(--font-size-sm);
+  }
+
+  .skillLabel {
+    min-width: 100px;
+    font-size: var(--font-size-xs);
+  }
+
+  .saveActions {
+    flex-direction: column;
+  }
+
+  .saveActions button {
+    width: 100%;
   }
 }
 

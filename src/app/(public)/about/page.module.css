@@ -136,4 +136,34 @@
     font-size: var(--font-size-sm);
     line-height: 1.6;
   }
+
+  .title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .mission {
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .founderCard {
+    padding: var(--spacing-md);
+  }
+
+  .founderImageWrapper,
+  .founderImage,
+  .founderImageFallback {
+    width: 100px;
+    height: 100px;
+  }
+
+  .founderName {
+    font-size: var(--font-size-lg);
+  }
 }

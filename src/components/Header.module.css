@@ -89,3 +89,44 @@
   color: var(--color-primary-blue);
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .brandName {
+    font-size: var(--font-size-xl);
+  }
+
+  .navLinks {
+    gap: var(--spacing-md);
+  }
+
+  .navLink {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+
+  .brandName {
+    font-size: var(--font-size-lg);
+  }
+
+  .navLinks {
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--color-bg-blue-100);
+  }
+}
+

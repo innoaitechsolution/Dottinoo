@@ -223,6 +223,167 @@
   color: var(--color-text-soft);
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .welcomeText {
+    font-size: var(--font-size-base);
+  }
+
+  .actionHint {
+    padding: var(--spacing-lg);
+  }
+
+  .actionHintTitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .actionHintText {
+    font-size: var(--font-size-sm);
+  }
+
+  .quickLinks,
+  .statsSection {
+    padding: var(--spacing-lg);
+  }
+
+  .linksGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .statValue {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--spacing-md);
+  }
+
+  .title {
+    font-size: var(--font-size-xl);
+  }
+
+  .welcomeText {
+    font-size: var(--font-size-sm);
+  }
+
+  .actionHint {
+    padding: var(--spacing-md);
+  }
+
+  .actionHintTitle {
+    font-size: var(--font-size-base);
+  }
+
+  .actionHintText {
+    font-size: var(--font-size-xs);
+  }
+
+  .quickLinks,
+  .statsSection {
+    padding: var(--spacing-md);
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .statCard {
+    padding: var(--spacing-md);
+  }
+
+  .statValue {
+    font-size: var(--font-size-xl);
+  }
+
+  .linkCard {
+    padding: var(--spacing-md);
+  }
+
+  .linkCard h3 {
+    font-size: var(--font-size-base);
+  }
+
+  .panel {
+    padding: var(--spacing-md);
+  }
+
+  /* Reports page responsive */
+  .panel table {
+    font-size: var(--font-size-xs);
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .panel thead,
+  .panel tbody {
+    display: block;
+  }
+
+  .panel tr {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr repeat(4, 1fr);
+    min-width: 600px;
+  }
+
+  .panel th,
+  .panel td {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    word-break: break-word;
+  }
+
+  .panel > div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: var(--spacing-lg) !important;
+  }
+
+  .panel svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel {
+    padding: var(--spacing-sm);
+  }
+
+  .panel table {
+    font-size: var(--font-size-xs);
+  }
+
+  .panel tr {
+    grid-template-columns: 1fr 1fr;
+    min-width: 100%;
+  }
+
+  .panel th:nth-child(n+3),
+  .panel td:nth-child(n+3) {
+    display: none;
+  }
+
+  .panel th:first-child,
+  .panel td:first-child {
+    grid-column: 1 / -1;
+    font-weight: var(--font-weight-semibold);
+    padding-bottom: var(--spacing-xs);
+  }
+}
+
 .panel {
   background-color: var(--color-white);
   border-radius: var(--radius-lg);

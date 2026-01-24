@@ -84,3 +84,31 @@
   color: var(--color-deep-navy);
 }
 
+@media (max-width: 768px) {
+  .backButtonContainer {
+    padding: 0 var(--spacing-md);
+  }
+
+  .title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .logo {
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: var(--font-size-xl);
+  }
+
+  .subtitle {
+    font-size: var(--font-size-sm);
+  }
+
+  .logo {
+    height: 48px;
+  }
+}
+

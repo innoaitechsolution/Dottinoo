@@ -84,3 +84,21 @@
   cursor: wait;
 }
 
+@media (max-width: 480px) {
+  .button {
+    width: 100%;
+  }
+
+  .sm {
+    min-height: 44px;
+  }
+
+  .md {
+    min-height: 44px;
+  }
+
+  .lg {
+    min-height: 48px;
+  }
+}
+

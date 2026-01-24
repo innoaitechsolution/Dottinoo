@@ -35,3 +35,29 @@
   max-width: 800px;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .card {
+    padding: var(--spacing-xl);
+  }
+
+  .cardWide {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--spacing-md);
+    min-height: calc(100vh - 60px);
+  }
+
+  .card {
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+  }
+}
+

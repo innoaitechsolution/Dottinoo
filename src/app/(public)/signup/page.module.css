@@ -129,3 +129,42 @@
   color: var(--color-deep-navy);
 }
 
+@media (max-width: 768px) {
+  .title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .logo {
+    height: 60px;
+  }
+
+  .confirmationTitle,
+  .requestTitle {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: var(--font-size-xl);
+  }
+
+  .subtitle {
+    font-size: var(--font-size-sm);
+  }
+
+  .logo {
+    height: 48px;
+  }
+
+  .confirmationTitle,
+  .requestTitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .confirmationMessage,
+  .requestMessage {
+    font-size: var(--font-size-sm);
+  }
+}
+

@@ -445,3 +445,107 @@
   padding: var(--spacing-xxl);
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .taskContent,
+  .submissionSection,
+  .reviewSection {
+    padding: var(--spacing-lg);
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .instructions,
+  .stepItem,
+  .criterionItem {
+    font-size: var(--font-size-sm);
+  }
+
+  .stepsList,
+  .criteriaList {
+    padding-left: var(--spacing-md);
+  }
+
+  .diffItem {
+    padding: var(--spacing-sm);
+  }
+
+  .diffLabel {
+    font-size: var(--font-size-sm);
+  }
+
+  .diffItem p {
+    font-size: var(--font-size-sm);
+  }
+
+  .assignmentsList {
+    gap: var(--spacing-md);
+  }
+
+  .assignmentCard {
+    padding: var(--spacing-md);
+  }
+
+  .studentHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .studentStatusRow {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--spacing-md);
+  }
+
+  .title {
+    font-size: var(--font-size-xl);
+  }
+
+  .breadcrumb {
+    font-size: var(--font-size-xs);
+  }
+
+  .taskContent,
+  .submissionSection,
+  .reviewSection {
+    padding: var(--spacing-md);
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-base);
+  }
+
+  .className,
+  .dueDate {
+    font-size: var(--font-size-sm);
+  }
+
+  .textarea {
+    font-size: var(--font-size-sm);
+  }
+
+  .fileInput {
+    font-size: var(--font-size-sm);
+  }
+}
+
