@@ -5,39 +5,22 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { getMyProfile, Profile } from '@/lib/supabase/profile'
 import { listMyClasses, Class } from '@/lib/supabase/classes'
+import { getReportData, ClassReportData, ReportRange } from '@/lib/supabase/reports'
+import { StackedBarChart, LineChart } from '@/components/charts/SimpleCharts'
 import Button from '@/components/Button'
 import BackButton from '@/components/BackButton'
+import Select from '@/components/Select'
 import styles from '../page.module.css'
-
-interface ClassReport {
-  classId: string
-  className: string
-  totalTasks: number
-  totalAssignments: number
-  submittedCount: number
-  reviewedCount: number
-  totalStars: number
-  students: StudentReport[]
-}
-
-interface StudentReport {
-  studentId: string
-  studentName: string
-  studentEmail: string
-  assignedTasks: number
-  submittedTasks: number
-  reviewedTasks: number
-  totalStars: number
-}
 
 export default function ReportsPage() {
   const router = useRouter()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [classes, setClasses] = useState<Class[]>([])
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null)
-  const [report, setReport] = useState<ClassReport | null>(null)
+  const [report, setReport] = useState<ClassReportData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingReport, setIsLoadingReport] = useState(false)
+  const [dateRange, setDateRange] = useState<ReportRange>('all')
 
   useEffect(() => {
     const loadData = async () => {
@@ -68,74 +51,28 @@ export default function ReportsPage() {
     loadData()
   }, [router])
 
-  const loadReport = async (classId: string) => {
+  const loadReport = async (classId: string, range: ReportRange = 'all') => {
     setIsLoadingReport(true)
     try {
-      // Get class info
-      const { data: classData } = await supabase
-        .from('classes')
-        .select('*')
-        .eq('id', classId)
-        .single()
-
-      // Get tasks for this class
-      const { data: tasks } = await supabase
-        .from('tasks')
-        .select('id')
-        .eq('class_id', classId)
-
-      const taskIds = tasks?.map(t => t.id) || []
-
-      // Get assignments
-      const { data: assignments } = await supabase
-        .from('task_assignments')
-        .select('*, tasks!inner(class_id)')
-        .in('task_id', taskIds)
-
-      // Get students in class
-      const { data: memberships } = await supabase
-        .from('class_memberships')
-        .select('student_id, profiles!inner(id, full_name, email)')
-        .eq('class_id', classId)
-
-      // Calculate stats
-      const totalTasks = taskIds.length
-      const totalAssignments = assignments?.length || 0
-      const submittedCount = assignments?.filter(a => a.status === 'submitted' || a.status === 'reviewed').length || 0
-      const reviewedCount = assignments?.filter(a => a.status === 'reviewed').length || 0
-      const totalStars = assignments?.reduce((sum, a) => sum + (a.stars_awarded || 0), 0) || 0
-
-      // Per-student stats
-      const students: StudentReport[] = (memberships || []).map((m: any) => {
-        const studentId = m.student_id
-        const studentAssignments = assignments?.filter(a => a.student_id === studentId) || []
-        return {
-          studentId,
-          studentName: m.profiles?.full_name || 'Unknown',
-          studentEmail: m.profiles?.email || '',
-          assignedTasks: studentAssignments.length,
-          submittedTasks: studentAssignments.filter(a => a.status === 'submitted' || a.status === 'reviewed').length,
-          reviewedTasks: studentAssignments.filter(a => a.status === 'reviewed').length,
-          totalStars: studentAssignments.reduce((sum: number, a: any) => sum + (a.stars_awarded || 0), 0),
-        }
-      })
-
-      setReport({
-        classId,
-        className: classData?.name || 'Unknown Class',
-        totalTasks,
-        totalAssignments,
-        submittedCount,
-        reviewedCount,
-        totalStars,
-        students,
-      })
+      const { data: reportData, error } = await getReportData(classId, range)
+      if (error) {
+        console.error('Error loading report:', error)
+      } else {
+        setReport(reportData)
+      }
     } catch (err) {
       console.error('Error loading report:', err)
     } finally {
       setIsLoadingReport(false)
     }
   }
+
+  useEffect(() => {
+    if (selectedClassId) {
+      loadReport(selectedClassId, dateRange)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRange])
 
   const exportToCSV = () => {
     if (!report) return
@@ -173,6 +110,12 @@ export default function ReportsPage() {
     URL.revokeObjectURL(url)
   }
 
+  const exportToPDF = () => {
+    if (!selectedClassId) return
+    const url = `/app/reports/print?classId=${selectedClassId}&range=${dateRange}`
+    window.open(url, '_blank')
+  }
+
   if (isLoading) {
     return (
       <div className={styles.container}>
@@ -192,21 +135,43 @@ export default function ReportsPage() {
         <div className={styles.panel} style={{ marginBottom: '1.5rem' }}>
           <h2 className={styles.sectionTitle}>Select Class</h2>
           {classes.length === 0 ? (
-            <p>No classes found. Create a class first.</p>
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <p style={{ marginBottom: '1rem' }}>No classes found. Create a class first.</p>
+              <Button variant="primary" onClick={() => router.push('/app/classes#create')}>
+                Create Class
+              </Button>
+            </div>
           ) : (
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
               {classes.map((cls) => (
                 <Button
                   key={cls.id}
                   variant={selectedClassId === cls.id ? 'primary' : 'secondary'}
                   onClick={() => {
                     setSelectedClassId(cls.id)
-                    loadReport(cls.id)
+                    loadReport(cls.id, dateRange)
                   }}
                 >
                   {cls.name}
                 </Button>
               ))}
+              {selectedClassId && (
+                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <label htmlFor="dateRange" style={{ fontSize: '0.875rem', color: '#666' }}>
+                    Period:
+                  </label>
+                  <Select
+                    id="dateRange"
+                    value={dateRange}
+                    onChange={(e) => setDateRange(e.target.value as ReportRange)}
+                    style={{ minWidth: '120px' }}
+                  >
+                    <option value="all">All Time</option>
+                    <option value="last90">Last 90 Days</option>
+                    <option value="last30">Last 30 Days</option>
+                  </Select>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -219,12 +184,29 @@ export default function ReportsPage() {
 
         {report && !isLoadingReport && (
           <>
+            {/* Show message if no data for selected range */}
+            {report.totalTasks === 0 && (
+              <div className={styles.panel} style={{ marginBottom: '1.5rem' }}>
+                <p style={{ textAlign: 'center', color: '#666', padding: '1rem' }}>
+                  No data available for the selected period ({dateRange === 'last30' ? 'Last 30 Days' : dateRange === 'last90' ? 'Last 90 Days' : 'All Time'}). 
+                  Try selecting a different period or create tasks for this class.
+                </p>
+              </div>
+            )}
+
+            {report.totalTasks > 0 && (
+              <>
             <div className={styles.panel} style={{ marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h2 className={styles.sectionTitle}>{report.className} - Summary</h2>
-                <Button variant="primary" onClick={exportToCSV}>
-                  Export CSV
-                </Button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <Button variant="secondary" onClick={exportToCSV}>
+                    Export CSV
+                  </Button>
+                  <Button variant="primary" onClick={exportToPDF}>
+                    Export PDF
+                  </Button>
+                </div>
               </div>
               <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
@@ -246,6 +228,31 @@ export default function ReportsPage() {
                 <div className={styles.statCard}>
                   <div className={styles.statValue}>{report.totalStars} ⭐</div>
                   <div className={styles.statLabel}>Total Stars</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Progress Charts Section */}
+            <div className={styles.panel} style={{ marginBottom: '1.5rem' }}>
+              <h2 className={styles.sectionTitle}>Progress</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginTop: '1rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: '#133E6C' }}>
+                    Assignment Status Breakdown
+                  </h3>
+                  <StackedBarChart data={report.assignmentStatusBreakdown} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: '#133E6C' }}>
+                    Stars Over Time
+                  </h3>
+                  {report.weeklyStars.length > 0 ? (
+                    <LineChart data={report.weeklyStars} />
+                  ) : (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                      No stars data available for the selected period
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -279,6 +286,8 @@ export default function ReportsPage() {
                 </table>
               </div>
             </div>
+              </>
+            )}
           </>
         )}
       </div>

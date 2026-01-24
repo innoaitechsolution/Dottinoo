@@ -1,0 +1,195 @@
+/* Print-friendly styles for PDF export */
+.container {
+  padding: 2rem;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.125rem;
+}
+
+.printContainer {
+  max-width: 210mm; /* A4 width */
+  margin: 0 auto;
+  padding: 20mm;
+  background: white;
+  color: #000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 12pt;
+  line-height: 1.5;
+}
+
+.printHeader {
+  border-bottom: 2px solid #133E6C;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.printTitle {
+  font-size: 24pt;
+  font-weight: 700;
+  color: #133E6C;
+  margin: 0 0 0.5rem 0;
+}
+
+.printMeta {
+  display: flex;
+  gap: 2rem;
+  font-size: 10pt;
+  color: #666;
+}
+
+.printSection {
+  margin-bottom: 2rem;
+  page-break-inside: avoid;
+}
+
+.printSectionTitle {
+  font-size: 16pt;
+  font-weight: 600;
+  color: #133E6C;
+  margin: 0 0 1rem 0;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+.printStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.printStat {
+  text-align: center;
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.printStatValue {
+  font-size: 20pt;
+  font-weight: 700;
+  color: #133E6C;
+  margin-bottom: 0.25rem;
+}
+
+.printStatLabel {
+  font-size: 10pt;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.printTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.printTable thead {
+  background: #133E6C;
+  color: white;
+}
+
+.printTable th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 10pt;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.printTable th:not(:first-child) {
+  text-align: center;
+}
+
+.printTable td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.printTable tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.printNumber {
+  text-align: center;
+  font-weight: 600;
+}
+
+.printFooter {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9pt;
+  color: #666;
+}
+
+/* Print media queries */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  /* Hide navigation and UI elements */
+  nav,
+  header,
+  button,
+  .backButton,
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  .printContainer {
+    padding: 15mm;
+    box-shadow: none;
+  }
+
+  .printSection {
+    page-break-inside: avoid;
+  }
+
+  .printTable {
+    page-break-inside: auto;
+  }
+
+  .printTable tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .printTable thead {
+    display: table-header-group;
+  }
+
+  .printTable tfoot {
+    display: table-footer-group;
+  }
+
+  .printFooter {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+}
+
+/* Screen-only styles (hide when printing) */
+@media screen {
+  .printContainer {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 2rem auto;
+  }
+}
