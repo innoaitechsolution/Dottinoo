@@ -192,6 +192,37 @@ export async function POST(request: NextRequest) {
           }
         }
 
+        // Create UI preferences for demo (optional - demonstrates the feature)
+        // Student 1 gets larger font and spacing, Student 3 gets high contrast
+        const uiPrefs: any = {}
+        if (i === 0) {
+          // Student 1: larger font and spacing
+          uiPrefs.font_scale = 'lg'
+          uiPrefs.spacing = 'lg'
+        } else if (i === 2) {
+          // Student 3: high contrast
+          uiPrefs.high_contrast = true
+        }
+
+        if (Object.keys(uiPrefs).length > 0) {
+          const { error: prefsError } = await adminClient
+            .from('student_ui_prefs')
+            .upsert({
+              student_id: authData.user.id,
+              font_scale: uiPrefs.font_scale || 'md',
+              spacing: uiPrefs.spacing || 'md',
+              reduce_clutter: uiPrefs.reduce_clutter || false,
+              simplified_language: uiPrefs.simplified_language || false,
+              high_contrast: uiPrefs.high_contrast || false,
+            }, {
+              onConflict: 'student_id',
+            })
+
+          if (prefsError) {
+            console.warn(`UI prefs warning for ${email}:`, prefsError)
+          }
+        }
+
         // Add class membership
         const { error: membershipError } = await adminClient
           .from('class_memberships')

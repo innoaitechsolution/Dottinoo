@@ -10,6 +10,7 @@ import { getStudentStats, StudentStats } from '@/lib/supabase/stats'
 import { listMyClasses } from '@/lib/supabase/classes'
 import { listTeacherNeedsReview, NeedsReviewItem } from '@/lib/supabase/dashboard'
 import { listStudentNextTasks, NextTaskItem } from '@/lib/supabase/dashboard'
+import { useStudentUiPrefs, getUiPrefsClasses } from '@/lib/ui/useStudentUiPrefs'
 import Button from '@/components/Button'
 import StatusChip from '@/components/StatusChip'
 import styles from './page.module.css'
@@ -32,6 +33,10 @@ export default function AppPage() {
   const [isCreatingDemoUsers, setIsCreatingDemoUsers] = useState(false)
   const [demoUsersResult, setDemoUsersResult] = useState<any>(null)
   const [demoUsersError, setDemoUsersError] = useState<string | null>(null)
+
+  // Load UI preferences for students
+  const { prefs: uiPrefs, isLoading: isLoadingPrefs } = useStudentUiPrefs()
+  const uiPrefsClasses = getUiPrefsClasses(uiPrefs)
 
   useEffect(() => {
     const checkSession = async () => {
@@ -331,7 +336,7 @@ export default function AppPage() {
     : null
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${uiPrefsClasses}`} data-font={uiPrefs?.font_scale} data-spacing={uiPrefs?.spacing}>
       <div className={styles.content}>
         <h1 className={styles.title}>Dashboard</h1>
         <div className={styles.welcomeSection}>

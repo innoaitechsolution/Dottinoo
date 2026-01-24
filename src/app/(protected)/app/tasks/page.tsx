@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase/client'
 import { getMyProfile, Profile } from '@/lib/supabase/profile'
 import { listTasksForTeacher, listTasksForStudent, TaskWithClass, getAssignmentStatusForTask, getSubmissionCountsForTask } from '@/lib/supabase/tasks'
 import { DIGITAL_SKILLS, SKILL_LEVELS } from '@/lib/supabase/skillProfiles'
+import { useStudentUiPrefs, getUiPrefsClasses } from '@/lib/ui/useStudentUiPrefs'
 import StatusChip from '@/components/StatusChip'
 import Button from '@/components/Button'
 import BackButton from '@/components/BackButton'
@@ -20,6 +21,10 @@ export default function TasksPage() {
   const [taskCounts, setTaskCounts] = useState<Record<string, { submitted: number; reviewed: number }>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Load UI preferences for students
+  const { prefs: uiPrefs } = useStudentUiPrefs()
+  const uiPrefsClasses = getUiPrefsClasses(uiPrefs)
 
   useEffect(() => {
     const loadData = async () => {
@@ -93,7 +98,7 @@ export default function TasksPage() {
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
+      <div className={`${styles.container} ${uiPrefsClasses}`}>
         <div className={styles.loading}>Loading...</div>
       </div>
     )
@@ -113,7 +118,7 @@ export default function TasksPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${uiPrefsClasses}`} data-font={uiPrefs?.font_scale} data-spacing={uiPrefs?.spacing}>
       <div className={styles.content}>
         <BackButton fallbackHref="/app" className={styles.backButton} />
         <div className={styles.header}>

@@ -90,3 +90,100 @@ body {
 
 /* Import Accessibility Styles */
 @import './accessibility.css';
+
+/* ============================================================================
+   UI PREFERENCES - STUDENT ACCESSIBILITY
+   ============================================================================ */
+
+/* Font Scale */
+[data-font="sm"] {
+  font-size: 0.875rem;
+}
+
+[data-font="md"] {
+  font-size: 1rem;
+}
+
+[data-font="lg"] {
+  font-size: 1.25rem;
+}
+
+[data-font="xl"] {
+  font-size: 1.5rem;
+}
+
+[data-font="sm"] h1,
+[data-font="sm"] h2,
+[data-font="sm"] h3,
+[data-font="sm"] h4,
+[data-font="sm"] h5,
+[data-font="sm"] h6 {
+  font-size: calc(1em * 1.2);
+}
+
+[data-font="lg"] h1,
+[data-font="lg"] h2,
+[data-font="lg"] h3,
+[data-font="lg"] h4,
+[data-font="lg"] h5,
+[data-font="lg"] h6 {
+  font-size: calc(1em * 1.3);
+}
+
+[data-font="xl"] h1,
+[data-font="xl"] h2,
+[data-font="xl"] h3,
+[data-font="xl"] h4,
+[data-font="xl"] h5,
+[data-font="xl"] h6 {
+  font-size: calc(1em * 1.4);
+}
+
+/* Spacing */
+[data-spacing="sm"] {
+  --spacing-xs: 0.125rem;
+  --spacing-sm: 0.25rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+}
+
+[data-spacing="md"] {
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+}
+
+[data-spacing="lg"] {
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+}
+
+/* Reduce Clutter */
+.reduce-clutter .quickLinks {
+  display: none;
+}
+
+.reduce-clutter .statsSection {
+  display: none;
+}
+
+/* High Contrast */
+.high-contrast {
+  --color-deep-navy: #000000;
+  --color-text-default: #000000;
+  --color-text-soft: #333333;
+  --color-primary-blue: #0066CC;
+  --color-bg-blue-50: #FFFFFF;
+  --color-bg-blue-100: #F0F0F0;
+  filter: contrast(1.2);
+}
+
+.high-contrast * {
+  border-color: #000000 !important;
+}
