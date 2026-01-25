@@ -5,17 +5,26 @@ A Next.js education platform for ages 14-24, built with TypeScript and Supabase 
 ## Features
 
 - 🎨 **Brand-focused design** with custom CSS variables and design tokens
-- 🔐 **Supabase authentication** with email/password sign up and sign in
+- 🔐 **Supabase authentication** with email/password and OAuth (Google)
 - 🛡️ **Protected routes** with session-based access control
 - 📱 **Responsive layout** with clean, modern UI
 - 🎯 **Type-safe** with TypeScript throughout
+- 👥 **Role-based access** (teacher/admin, student)
+- 📚 **Class management** with invite codes
+- ✅ **Task creation and assignment** (manual, templates, AI-assisted)
+- 📝 **Student submissions** with file attachments
+- ⭐ **Review and feedback** with star awards
+- 📊 **Reports and analytics** with CSV export
+- ♿ **Accessibility features** (UI preferences, support needs)
 
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: CSS Modules + CSS Variables (no Tailwind)
-- **Authentication**: Supabase
+- **Authentication**: Supabase Auth (email/password, OAuth)
+- **Database**: Supabase Postgres (with Row Level Security)
+- **Storage**: Supabase Storage (for file attachments)
 - **Package Manager**: npm
 
 ## Prerequisites
@@ -47,244 +56,100 @@ cp .env.example .env.local
 
 Then edit `.env.local` with your Supabase credentials:
 
-```
+```env
+# Required
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Optional - Server-only (for demo features)
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Optional - Feature flags
+DEMO_SEED_ENABLED=true
+AI_DRAFTS_ENABLED=true
+
+# Optional - AI features (if AI_DRAFTS_ENABLED=true)
+OPENAI_API_KEY=your_openai_api_key
+
+# Optional - SEO metadata (defaults to https://dottinoo.co.uk)
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
 ```
+
+**Environment Variable Reference:**
+
+| Variable | Description | Required | Notes |
+|----------|-------------|----------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | Yes | Public, safe to expose |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon/public key | Yes | Public, safe to expose |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | No | Server-only, for demo seed features |
+| `DEMO_SEED_ENABLED` | Enable demo seed utilities | No | Set to `"true"` to enable |
+| `AI_DRAFTS_ENABLED` | Enable AI task draft generation | No | Set to `"true"` to enable |
+| `OPENAI_API_KEY` | OpenAI API key for AI features | No | Required if `AI_DRAFTS_ENABLED=true` |
+| `NEXT_PUBLIC_SITE_URL` | Site URL for metadata/OG tags | No | Defaults to `https://dottinoo.co.uk` |
+
+**Important Security Notes:**
+- `NEXT_PUBLIC_*` variables are exposed to the client (safe for anon key)
+- `SUPABASE_SERVICE_ROLE_KEY` is server-only and should NEVER be exposed to the client
+- Do NOT commit `.env.local` to your repository
 
 ### 4. Set Up Supabase Database
 
-Before testing signup, you need to create the profiles table in your Supabase database:
+Run the SQL migrations in order. All migration files are in `supabase/sql/`:
+
+1. **001_profiles.sql** - Creates profiles table with RLS policies
+2. **002_core_classes_tasks.sql** - Creates classes, class_memberships, tasks, and task_assignments tables
+3. **003_task_flow_submissions_ai.sql** - Creates submissions table and RPC functions (submit_task, review_task)
+4. **003_task_flow_submissions_ai_update.sql** - Updates submit_task RPC to use attachment_path
+5. **004_storage_attachments.sql** - Sets up storage bucket for file attachments
+6. **005_indexes_and_validation.sql** - Adds indexes and validation constraints
+7. **006_profile_from_auth_metadata.sql** - Auto-creates profiles from auth metadata
+8. **007_rls_fixes.sql** - Fixes RLS policies for classes (critical for teacher access)
+9. **008_fix_rls_recursion.sql** - Fixes RLS recursion errors
+10. **009_join_assignments_fix.sql** - Ensures students see tasks when joining class
+11. **010_student_profile_tags.sql** - Adds student personalization fields
+12. **012_rpc_list_student_tasks.sql** - Creates RPC function for student task listing
+13. **013_digital_skills_profiles.sql** - Adds digital skills tracking per class
+14. **014_ui_preferences.sql** - Adds UI preferences column to profiles
+15. **015_ui_preferences_rls.sql** - Ensures RLS allows UI preferences updates
+16. **016_student_support_needs.sql** - Creates student_support_needs and student_ui_prefs tables
+
+**To run migrations:**
 
 1. Go to your Supabase project dashboard
 2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/001_profiles.sql` from this repository
+3. Open each migration file from `supabase/sql/` in order
 4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
+5. Click **Run** to execute
 
-This will create the `profiles` table with Row Level Security (RLS) policies that allow users to manage their own profiles.
+**Important Notes:**
+- Run migrations in numerical order (001, 002, 003, etc.)
+- After running `004_storage_attachments.sql`, if bucket creation fails, create it manually:
+  - Go to Supabase Dashboard → **Storage**
+  - Click **Create Bucket**
+  - Name: `submissions`
+  - Public: **false** (keep it private)
+- After running `006_profile_from_auth_metadata.sql`, ensure email confirmation is enabled in Supabase Auth settings
+- If you see "Failed to load classes" errors, ensure `007_rls_fixes.sql` and `008_fix_rls_recursion.sql` are run
 
-### 5. Set Up Core Database Tables
+### 5. Set Up OAuth (Google)
 
-After setting up profiles, create the core tables for classes, tasks, and assignments:
+To enable Google OAuth sign-in:
 
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/002_core_classes_tasks.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
+1. Go to Supabase Dashboard → **Authentication** → **Providers**
+2. Enable **Google** provider
+3. Add your Google OAuth credentials (Client ID and Client Secret)
+4. Add redirect URLs in Supabase:
+   - `http://localhost:3000/app` (for local development)
+   - `https://your-domain.com/app` (for production)
+   - `https://your-preview-url.netlify.app/app` (for Netlify previews)
 
-This will create the `classes`, `class_memberships`, `tasks`, and `task_assignments` tables with RLS policies and a function for joining classes by invite code.
+**Callback URL Format:**
+- Supabase will redirect to: `{your-site-url}/app` after OAuth sign-in
+- Ensure this URL is added to both Supabase redirect URLs and your OAuth provider settings
 
-### 6. Set Up Task Flow Tables
+**Note:** Apple and Microsoft OAuth are UI-ready but not configured. The UI will show a message directing users to use Email or Google.
 
-After setting up core tables, create the submissions table and RPC functions for task submission and review:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/003_task_flow_submissions_ai.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-This will create the `submissions` table with RLS policies and RPC functions for `submit_task` and `review_task`.
-
-### 7. Set Up Storage for File Attachments
-
-Set up Supabase Storage for file uploads in task submissions:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/004_storage_attachments.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-**Important:** If the bucket creation fails due to permissions, create it manually:
-1. Go to Supabase Dashboard > **Storage**
-2. Click **Create Bucket**
-3. Name: `submissions`
-4. Public: **false** (unchecked - keep it private)
-5. Click **Create bucket**
-
-This will:
-- Create the `submissions` storage bucket (private)
-- Add `attachment_path` column to the submissions table
-- Set up RLS policies for secure file access
-
-**Folder convention:** Files are stored as `submissions/<userId>/<assignmentId>/<filename>`
-
-**Note:** After running the storage SQL, you may also need to update the `submit_task` RPC function. If you've already run `003_task_flow_submissions_ai.sql`, run `supabase/sql/003_task_flow_submissions_ai_update.sql` to update the function to use `attachment_path` instead of `attachment_url`.
-
-### 8. Add Database Indexes and Validation
-
-Add performance indexes and data validation constraints:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/005_indexes_and_validation.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-This will:
-- Add CHECK constraints for data length validation (submissions content, task titles/instructions)
-- Create indexes on frequently queried columns for better performance
-- Update the `submit_task` RPC to validate content length and reject empty submissions
-
-### 9. Set Up Automatic Profile Creation
-
-Set up automatic profile creation from auth metadata:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/006_profile_from_auth_metadata.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-This will create a database trigger that automatically creates a profile when a user signs up, using the role and full_name from the signup metadata. This ensures profiles are created server-side, not from the client.
-
-**Important:** Make sure email confirmation is enabled in your Supabase project settings (Authentication > Email Templates > Confirm signup). The profile will be created when the user confirms their email.
-
-### 10. Fix RLS Policies for Classes
-
-Fix Row Level Security policies to ensure teachers can view their classes:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/007_rls_fixes.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-This will:
-- Replace the "FOR ALL" policy with explicit SELECT, INSERT, UPDATE, DELETE policies for teachers
-- Ensure teachers can SELECT their own classes (fixes "Failed to load classes" issue)
-- Ensure teachers can SELECT class memberships for their classes
-- Keep all existing student policies intact
-
-**Important:** This migration fixes a critical issue where teachers cannot view classes after creating them (via demo seed or manually). Run this migration if you experience "Failed to load classes" errors.
-
-### 11. Fix RLS Recursion Error
-
-Fix the "infinite recursion detected in policy" error that may occur after running step 10:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/008_fix_rls_recursion.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-This will:
-- Create SECURITY DEFINER helper functions to break circular RLS dependencies
-- Replace recursive policies with non-recursive versions using helper functions
-- Ensure teachers can SELECT their own classes (no recursion)
-- Ensure students can SELECT classes they are members of (no recursion)
-- Ensure teachers can SELECT memberships for their classes (no recursion)
-- Maintain all existing permissions and least-privilege access
-
-**Important:** If you see "infinite recursion detected in policy for relation 'classes'" after running step 10, run this migration immediately. The helper functions use SECURITY DEFINER to bypass RLS when checking cross-table relationships, breaking the recursion cycle.
-
-### 12. Fix Task Assignments on Class Join
-
-Ensure students who join a class after tasks exist immediately see those tasks:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/009_join_assignments_fix.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-This will:
-- Update `join_class_by_code` RPC to create task assignments for ALL existing tasks when a student joins
-- Use efficient INSERT...SELECT instead of a loop
-- Add validation to ensure only students can join classes
-- Return both class_id and class_name for UI confirmation
-
-**Important:** This fixes the issue where students who join a class via invite code after tasks already exist don't see those tasks. After this migration, joining a class will automatically create task assignments for all existing tasks in that class, making tasks visible immediately on `/app/tasks`.
-
-### 13. Add Student Profile Tags for Personalization
-
-Add optional fields to profiles for student personalization (without sensitive medical data):
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/010_student_profile_tags.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-This will:
-- Add `support_needs_tags` (text array) for support need tags
-- Add `digital_skill_level` (text: 'starter', 'intermediate', 'advanced')
-- Add `interests` (text array, optional) for student interests
-- Enable teacher personalization when assigning tasks
-- Support demo seed with diverse student profiles
-
-**Important:** These fields are optional and intended for educational personalization only. They do NOT contain sensitive medical information.
-
-### 14. Fix Student Task Listing (RPC)
-
-Fix the student task listing bug where tasks fail to load due to RLS recursion:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/012_rpc_list_student_tasks.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-This will:
-- Create a SECURITY DEFINER RPC function `list_student_tasks()` that returns assigned tasks
-- Avoid RLS recursion issues by using a single query with JOINs
-- Ensure students can only see their own assigned tasks (enforced by WHERE clause)
-- Return all fields needed by the UI (status, stars_awarded, class info, etc.)
-
-**Important:** This fixes the issue where students see "Failed to load tasks" even though task assignments exist. The RPC function bypasses RLS for the query but maintains security by filtering on `student_id = auth.uid()`.
-
-### 15. Add Digital Skills Profiles (Personalization)
-
-Enable teachers to set digital skills profiles for students and target tasks to specific skills:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/sql/013_digital_skills_profiles.sql` from this repository
-4. Copy and paste the SQL into the SQL Editor
-5. Click **Run** to execute the SQL
-
-This will:
-- Create `student_skill_profiles` table for tracking student digital skills per class
-- Add `target_skill` and `target_level` columns to `tasks` table
-- Set up RLS policies so teachers can manage profiles for their classes
-- Allow students to view their own profiles
-
-**Digital Skills:**
-- `digital_safety`: Online safety, privacy, security
-- `search_information`: Finding and evaluating information online
-- `communication`: Email, messaging, professional communication
-- `productivity`: File organization, tools, time management
-- `ai_literacy`: Understanding and using AI tools responsibly
-
-**Levels:**
-- `beginner`: Just starting to learn
-- `developing`: Making progress, needs support
-- `confident`: Comfortable and independent
-
-**Features:**
-- Teachers can set skill profiles for each student in each class (via "Manage Students" on `/app/classes`)
-- Teachers can optionally target tasks to specific skills/levels when creating tasks
-- **Smart Suggestions**: When creating a task with target skill/level and choosing "Selected students", matching students are automatically preselected (teacher can modify)
-- **Student Skill Badges**: When selecting students, teachers see each student's skill levels as small badges
-- Students see skill labels on task cards when tasks are targeted
-- Tasks can be assigned to whole class or selected students
-- Indexes added for performance on `(class_id, target_skill)` and `(target_skill, target_level)`
-
-**Important:** This is for educational personalization only. Skills are tracked per class because a student's skill level may vary by context or class subject.
-
-### 16. Add Logo (Optional)
-
-Place your Dottinoo logo at:
-```
-public/brand/dottinoo-logo.png
-```
-
-If the logo is missing, a placeholder with "D" will be displayed.
-
-### 17. Run the Development Server
+### 6. Run the Development Server
 
 ```bash
 npm run dev
@@ -299,19 +164,40 @@ src/
 ├── app/
 │   ├── (public)/          # Public routes
 │   │   ├── login/         # Sign in page
-│   │   └── signup/        # Sign up page
-│   ├── (protected)/       # Protected routes
-│   │   └── app/           # Main app page (requires auth)
-│   ├── layout.tsx         # Root layout
+│   │   ├── signup/        # Sign up page
+│   │   ├── onboarding/    # OAuth provider selection
+│   │   ├── about/         # About page
+│   │   ├── privacy/       # Privacy notice
+│   │   └── terms/         # Terms of service
+│   ├── (protected)/      # Protected routes
+│   │   └── app/           # Main app (requires auth)
+│   │       ├── classes/   # Class management
+│   │       ├── tasks/     # Task list and creation
+│   │       ├── tasks/[taskId]/  # Task detail and review
+│   │       ├── reports/   # Reports and analytics
+│   │       ├── stars/     # Stars page (students)
+│   │       ├── teacher/   # Teacher dashboard
+│   │       └── student/   # Student dashboard
+│   ├── api/               # API routes
+│   │   ├── ai/            # AI endpoints (task-draft, feedback-draft, hint, rewrite)
+│   │   └── demo/          # Demo utilities (seed, create-demo-users)
+│   ├── layout.tsx         # Root layout with metadata
 │   └── globals.css        # Global styles & CSS variables
 ├── components/
 │   ├── Header.tsx         # App header with logo
 │   ├── Button.tsx         # Reusable button component
-│   └── Input.tsx          # Reusable input component
+│   ├── Input.tsx          # Reusable input component
+│   └── navigation/        # Navigation components
 ├── lib/
-│   └── supabase/
-│       ├── client.ts      # Supabase client instance
-│       └── auth.ts        # Auth helper functions
+│   ├── supabase/          # Supabase helpers
+│   │   ├── client.ts      # Supabase client instance
+│   │   ├── auth.ts        # Auth helper functions
+│   │   ├── classes.ts     # Class operations
+│   │   ├── tasks.ts       # Task operations
+│   │   ├── submissions.ts # Submission operations
+│   │   └── ...            # Other Supabase helpers
+│   ├── ai/                # AI provider abstraction
+│   └── templates/         # Task templates
 └── theme/
     └── tokens.ts          # Design tokens (TypeScript)
 ```
@@ -338,25 +224,76 @@ The app uses the following brand palette defined as CSS variables:
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
 
+## Pilot Flow
+
+The core user flow for the pilot:
+
+1. **Teacher creates class** → Receives invite code
+2. **Student joins class** → Uses invite code on `/app/classes`
+3. **Teacher creates task** → Manual, Template, or AI-assisted
+4. **Task assigned** → Automatically to class or selected students
+5. **Student views task** → On `/app/tasks` with status chips
+6. **Student submits** → Text content + optional file attachment
+7. **Teacher reviews** → Provides feedback and awards stars (0-5)
+8. **Student sees review** → On task detail page and `/app/stars` page
+
+**Additional Features:**
+- Teachers can set student support needs and UI preferences (teacher-only)
+- Students can customize UI preferences (font size, spacing, contrast)
+- Teachers can track digital skills per class
+- Tasks can be targeted to specific skills/levels
+- Reports page with CSV export for teachers
+
+## Demo Tooling
+
+### Demo Seed (`/api/demo/seed`)
+
+**What it does:**
+- Creates a demo class with invite code
+- Creates 3 demo students with diverse profiles (support needs, skill levels, UI preferences)
+- Creates 2-3 sample tasks with assignments
+- Creates 1 sample submission
+
+**Who can run it:**
+- Teachers and admins only (requires `DEMO_SEED_ENABLED=true`)
+- Requires `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+
+**How to use:**
+1. Login as teacher/admin
+2. Go to `/app/teacher` dashboard
+3. Click "Demo Seed" button
+4. Copy the returned credentials (class invite code, student emails/passwords)
+
+### Create Demo Users (`/api/demo/create-demo-users`)
+
+**What it does:**
+- Creates a demo teacher account
+- Creates a demo student account
+- Both accounts are pre-confirmed and ready to use
+
+**Who can run it:**
+- Teachers and admins only (requires `DEMO_SEED_ENABLED=true`)
+- Requires `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+
+**How to use:**
+1. Login as teacher/admin
+2. Go to `/app/teacher` dashboard
+3. Click "Create Demo Users" button
+4. Copy the returned credentials (emails and password)
+
+**Default Password:** `DottinooDemo123!` (for all demo accounts)
+
+**Security Note:** These endpoints check the user's role but do not verify that the `userId` in the request body matches the authenticated session. This is acceptable for demo/pilot use but should be hardened for production.
+
 ## Authentication Flow
 
-1. **Sign Up**: Users can create an account at `/signup`
-2. **Sign In**: Existing users sign in at `/login`
-3. **Protected Route**: `/app` requires authentication and redirects to `/login` if not signed in
-4. **Sign Out**: Users can sign out from the `/app` page
-
-## Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | Yes |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon/public key | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (for server-side operations) | Optional (for demo seed) |
-| `OPENAI_API_KEY` | OpenAI API key for AI task drafts | Optional |
-| `AI_DRAFTS_ENABLED` | Set to `"true"` to enable AI task draft generation | Optional |
-| `DEMO_SEED_ENABLED` | Set to `"true"` to enable demo seed utilities | Optional |
-
-**Note:** The app uses lazy initialization for Supabase client, so the build will succeed even if environment variables are missing. However, the app will require these variables at runtime.
+1. **Sign Up**: Users can create an account at `/signup` (email/password) or `/onboarding` (OAuth)
+2. **Sign In**: Existing users sign in at `/login` (email/password) or `/onboarding` (OAuth)
+3. **Protected Routes**: `/app` and all `/app/*` routes require authentication and redirect to `/login` if not signed in
+4. **Role-based Routing**: 
+   - Teachers/admins → `/app/teacher` dashboard
+   - Students → `/app/student` dashboard
+5. **Sign Out**: Users can sign out from the header navigation
 
 ## Deploying to Netlify
 
@@ -397,13 +334,24 @@ The app uses the following brand palette defined as CSS variables:
    DEMO_SEED_ENABLED=true
    ```
 
+   **Optional (for SEO metadata):**
+   ```
+   NEXT_PUBLIC_SITE_URL=https://your-domain.com
+   ```
+
    **Important:**
    - Do NOT commit `.env.local` to your repository
    - Environment variables in Netlify are set per-site, not per-deployment
    - `NEXT_PUBLIC_*` variables are exposed to the client (safe for anon key)
    - `SUPABASE_SERVICE_ROLE_KEY` is server-only and should never be exposed to the client
+   - Set `NEXT_PUBLIC_SITE_URL` to your Netlify domain for proper OG image URLs
 
-4. **Deploy**
+4. **Configure OAuth Redirect URLs**
+   - In Supabase Dashboard → Authentication → URL Configuration
+   - Add your Netlify domain: `https://your-site.netlify.app/app`
+   - Add preview URLs if using Netlify branch previews: `https://deploy-preview-*.netlify.app/app`
+
+5. **Deploy**
    - Netlify will automatically deploy on every push to your main branch
    - Or trigger a manual deploy from the Deploys tab
 
@@ -411,7 +359,7 @@ The app uses the following brand palette defined as CSS variables:
 
 The app is configured to build successfully on Netlify even if environment variables are missing:
 - Supabase client uses lazy initialization (checks env vars at runtime, not build time)
-- Public pages (/, /login, /signup, /terms, /privacy, /onboarding) can be statically generated
+- Public pages (/, /about, /login, /signup, /terms, /privacy, /onboarding) can be statically generated
 - Protected pages are client-side rendered and require env vars only at runtime
 
 **Note:** While the build will succeed without env vars, the app will not function correctly at runtime without the required Supabase variables. Always set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Netlify.
@@ -421,6 +369,8 @@ The app is configured to build successfully on Netlify even if environment varia
 - **Build fails with "Missing Supabase environment variables"**: This should not happen with the current setup. If it does, check that you're using the latest version of `src/lib/supabase/client.ts`
 - **App works locally but not on Netlify**: Verify environment variables are set correctly in Netlify (check Site settings → Environment variables)
 - **Static pages fail to generate**: Public pages should generate successfully. If they don't, check the build logs for specific errors
+- **OAuth redirect fails**: Ensure redirect URLs are added in both Supabase and your OAuth provider settings
+- **OG images not showing**: Ensure `NEXT_PUBLIC_SITE_URL` is set to your Netlify domain and `public/og/og-image.png` exists
 
 ## QA Checklist
 
@@ -438,6 +388,8 @@ Before deploying or testing the full flow, verify these scenarios:
   - [ ] Provide feedback
   - [ ] Award stars (0-5)
   - [ ] Mark as reviewed
+- [ ] **View Reports**: Teacher can view class stats and export CSV
+- [ ] **Manage Students**: Teacher can set support needs, UI preferences, and skill profiles
 
 ### Student Flow
 - [ ] **Join Class**: Student can join a class using invite code
@@ -449,6 +401,7 @@ Before deploying or testing the full flow, verify these scenarios:
 - [ ] **View Stars**: Student can see:
   - [ ] Total stars earned on dashboard
   - [ ] Recent stars with task titles and feedback on /app/stars page
+- [ ] **UI Preferences**: Student can customize font size, spacing, contrast, etc.
 
 ### End-to-End Test
 1. Teacher creates a class → Note the invite code
@@ -461,4 +414,3 @@ Before deploying or testing the full flow, verify these scenarios:
 ## License
 
 Private - Dottinoo Education Platform
-
