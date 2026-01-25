@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OG Image Generator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f0f0f0;
+    }
+    #canvas-container {
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container">
+    <canvas id="og-canvas" width="1200" height="630"></canvas>
+  </div>
+  <script>
+    const canvas = document.getElementById('og-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Background gradient
+    const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
+    gradient.addColorStop(0, '#ECF4FC');
+    gradient.addColorStop(1, '#93CEEE');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 1200, 630);
+    
+    // Decorative circles
+    ctx.fillStyle = 'rgba(144, 233, 213, 0.3)';
+    ctx.beginPath();
+    ctx.arc(1000, 100, 150, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = 'rgba(65, 150, 226, 0.2)';
+    ctx.beginPath();
+    ctx.arc(200, 500, 120, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Logo circle
+    ctx.fillStyle = '#2C6EAD';
+    ctx.beginPath();
+    ctx.arc(600, 235, 60, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Logo "D" text
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 48px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('D', 600, 235);
+    
+    // Title
+    ctx.fillStyle = '#133E6C';
+    ctx.font = 'bold 64px Arial, sans-serif';
+    ctx.fillText('Dottinoo', 600, 335);
+    
+    // Subtitle
+    ctx.fillStyle = '#355A7F';
+    ctx.font = '32px Arial, sans-serif';
+    ctx.fillText('Inclusive Learning Platform', 600, 395);
+    ctx.font = '28px Arial, sans-serif';
+    ctx.fillText('for UK Classrooms', 600, 435);
+    
+    // Download button (for manual use)
+    const link = document.createElement('a');
+    link.download = 'og-image.png';
+    link.href = canvas.toDataURL('image/png');
+    link.textContent = 'Right-click canvas → Save image as → og-image.png';
+    link.style.display = 'block';
+    link.style.marginTop = '20px';
+    link.style.textAlign = 'center';
+    link.style.padding = '10px';
+    link.style.background = '#2C6EAD';
+    link.style.color = 'white';
+    link.style.textDecoration = 'none';
+    link.style.borderRadius = '4px';
+    document.body.appendChild(link);
+    
+    // Auto-download (uncomment if needed)
+    // link.click();
+  </script>
+</body>
+</html>
