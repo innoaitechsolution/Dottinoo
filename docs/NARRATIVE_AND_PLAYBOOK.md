@@ -1,5 +1,13 @@
 # Dottinoo - Narrative + Demo Playbook + Checklists
 
+**Status:** Active  
+**Last Updated:** 2026-01-25  
+**Purpose:** Demo narrative variants, 10-minute demo script, pre-demo checklist, and trial metrics for demo day and award submissions.
+
+---
+
+# Dottinoo - Narrative + Demo Playbook + Checklists
+
 ## PART 3 — NARRATIVE + DEMO PLAYBOOK + CHECKLISTS
 
 ### A. Narrative Variants

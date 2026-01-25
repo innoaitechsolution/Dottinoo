@@ -1,5 +1,13 @@
 # Teacher/Student Dashboard Investigation (Read-Only)
 
+**Status:** Reference  
+**Last Updated:** 2026-01-25  
+**Purpose:** Investigation of role-based dashboard routing, troubleshooting guide for teacher/student UI issues, and diagnostic queries.
+
+---
+
+# Teacher/Student Dashboard Investigation (Read-Only)
+
 ## 1. Should Teacher and Student See Different Pages/Sections?
 
 **Answer: (B) Same page with conditional UI**

@@ -1,5 +1,15 @@
 # Demo Implementation Plan
 
+**Status:** Archive-candidate  
+**Last Updated:** 2026-01-25  
+**Purpose:** Historical implementation plan for demo features. All features are now complete; kept for historical record.
+
+**Note:** This overlaps with DEMO_IMPLEMENTATION_SUMMARY.md. Features are complete; see DEMO_COMPLETION_SUMMARY.md for final status.
+
+---
+
+# Demo Implementation Plan
+
 ## Priority Order
 
 ### Phase 1: Role Separation & Distinct Experiences (CRITICAL)

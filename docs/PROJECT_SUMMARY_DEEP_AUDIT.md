@@ -1,5 +1,13 @@
 # Dottinoo Web – Project Summary (Deep Audit)
 
+**Status:** Reference  
+**Last Updated:** 2026-01-25  
+**Purpose:** Deep technical audit covering routes, RBAC, security, known issues, and priorities for developers.
+
+---
+
+# Dottinoo Web – Project Summary (Deep Audit)
+
 ## 1. High-Level Overview
 
 ### App Purpose
@@ -36,13 +44,17 @@ Education platform for ages 14–24. Teachers create classes and tasks, assign t
 
 | Table / object | Purpose |
 |----------------|---------|
-| `profiles`    | `id` (→ auth.users), `role`, `full_name`, `created_at`; optional `support_needs_tags`, `digital_skill_level`, `interests` (010) |
+| `profiles`    | `id` (→ auth.users), `role`, `full_name`, `created_at`; optional `support_needs_tags`, `digital_skill_level`, `interests` (010); legacy `ui_preferences` (014, now uses `student_ui_prefs` table) |
+| `student_support_needs` | Teacher-only support needs (016): `id`, `student_id` (unique), `created_by`, `dyslexia`, `adhd`, `autism`, `other_needs`, `updated_at` |
+| `student_ui_prefs` | Student UI preferences (016): `student_id` (PK), `font_scale`, `spacing`, `reduce_clutter`, `simplified_language`, `high_contrast`, `updated_at` |
 | `classes`     | `teacher_id`→profiles, `name`, `invite_code` |
 | `class_memberships` | `class_id`, `student_id` |
 | `tasks`       | `class_id`, `created_by`, `title`, `instructions`, `steps` (jsonb), `differentiation` (jsonb), `success_criteria` (jsonb), `due_date`, `creation_mode` (manual/template/ai), optional `target_skill`, `target_level` (013) |
 | `task_assignments` | `task_id`, `student_id`, `status` (not_started, in_progress, submitted, reviewed), `feedback`, `stars_awarded`, `reviewed_at` |
-| `submissions` | `task_assignment_id`, `student_id`, `content`, `attachment_url` (legacy), `attachment_path` (004) |
+| `submissions` | `task_assignment_id`, `student_id`, `content`, `attachment_path` (004, not `attachment_url`) |
 | `student_skill_profiles` | Per-class, per-student skills: `digital_safety`, `search_information`, `communication`, `productivity`, `ai_literacy`; levels: `beginner`, `developing`, `confident` (013) |
+| `student_support_needs` | Teacher-only support needs (016): `id`, `student_id` (unique), `created_by`, `dyslexia`, `adhd`, `autism`, `other_needs`, `updated_at` |
+| `student_ui_prefs` | Student UI preferences (016): `student_id` (PK), `font_scale`, `spacing`, `reduce_clutter`, `simplified_language`, `high_contrast`, `updated_at` |
 
 **RPCs:** `join_class_by_code(text)`, `submit_task(uuid, text, text)` (third arg `p_attachment_path`), `review_task(uuid, uuid, text, int)`.  
 **Storage:** bucket `submissions`, private; RLS on `storage.objects` for `submissions` (user folder = `auth.uid()`; teachers can read via task/submission join).
@@ -51,7 +63,7 @@ Education platform for ages 14–24. Teachers create classes and tasks, assign t
 - **No global store** – React `useState`/`useEffect` in each page.
 - **Data access:** `src/lib/supabase/*` – direct Supabase client (`from()`, `rpc()`, `storage`). All from the client; no Server Components for data.
 - **API routes (Next.js):**
-  - `POST /api/ai/task-draft` – task draft from brief/subject/time/supportNeeds; uses OpenAI when `AI_DRAFTS_ENABLED=true` and `OPENAI_API_KEY` set, else mock. **No auth or role check.**
+  - `POST /api/ai/task-draft` – task draft from brief/subject/time/supportNeeds; uses OpenAI/Gemini when `AI_DRAFTS_ENABLED=true` and `OPENAI_API_KEY`/`GEMINI_API_KEY` set, else mock. **No auth or role check.**
   - `POST /api/demo/seed` – seeds demo class/tasks/assignments; requires `DEMO_SEED_ENABLED=true`, `userId` in body, and `profiles.role` in `{teacher, admin}`. **Does not verify the request is from the authenticated user with that `userId`.**
   - `POST /api/demo/create-demo-users` – creates demo teacher+student accounts; same env and role checks as seed. **Same: no check that `userId` in body is the caller.**
 
@@ -69,6 +81,7 @@ Education platform for ages 14–24. Teachers create classes and tasks, assign t
 | `/signup` | `src/app/(public)/signup/page.tsx` | Role (student/school/parent/…), email, password; `signUp` with `{ role, full_name }`; if session → `/app`, else email confirmation message | `signUp` |
 | `/terms` | `src/app/(public)/terms/page.tsx` | Static terms | — |
 | `/privacy` | `src/app/(public)/privacy/page.tsx` | Static privacy | — |
+| `/about` | `src/app/(public)/about/page.tsx` | Public About page with founder bio | — |
 
 There is **no** `/auth/callback`; OAuth redirects to `/app`.
 
@@ -87,6 +100,7 @@ There is **no** `/auth/callback`; OAuth redirects to `/app`.
 | `/app/tasks/new` | `src/app/(protected)/app/tasks/new/page.tsx` | Create task: class, title, instructions, steps, differentiation, success criteria, due date, target skill/level, assign to class or selected students; optional AI draft | `getMyProfile`, `listMyClasses`, `getStudentsWithSkills`, `createTask`, `createTaskAssignments`, `/api/ai/task-draft` |
 | `/app/tasks/[taskId]` | `src/app/(protected)/app/tasks/[taskId]/page.tsx` | Student: view task, submit (text + file), see feedback/stars. Teacher: list assignments/submissions, review (feedback, stars) | `getMyProfile`, task/assignment/submission APIs, `submitTask`, `reviewTask`, `uploadSubmissionFile`, `getSignedUrl` |
 | `/app/stars` | `src/app/(protected)/app/stars/page.tsx` | Student: my stars. Teacher: recent reviews | `getMyProfile`, `getMyStars` / `getTeacherRecentReviews` |
+| `/app/about` | `src/app/(public)/about/page.tsx` | Public About page with founder bio | — |
 
 ### Teacher Area
 Same as student for `/app`, `/app/classes`, `/app/tasks`, `/app/tasks/new`, `/app/tasks/[taskId]`, `/app/stars`. Teacher-only UI is controlled by `profile.role === 'teacher'` (or `'admin'` where applicable): Create class, Create Task, Manage Students, skill profiles, Needs Review, Demo Seed, Create Demo Users, review UI on task detail, etc.
@@ -147,7 +161,9 @@ These exist under `(protected)` but **not** under `(protected)/app`. The dashboa
 | **Classes (create, join, list)** | Working | `/app/classes`: create class, join by invite code (`join_class_by_code`), list. Teacher: Manage Students, skill profiles. |
 | **Digital skills (teacher)** | Working | `student_skill_profiles`; teacher sets levels per class in `/app/classes`; used in task creation (target skill/level, preselection). |
 | **File uploads (submissions)** | Working | `uploadSubmissionFile` → `submissions` bucket; `attachment_path` in `submissions`; `getSignedUrl` for download. Storage RLS in place. |
-| **AI task drafts** | Partially working | `/api/ai/task-draft`: mock when `AI_DRAFTS_ENABLED`/`OPENAI_API_KEY` not set; OpenAI when set. **No auth:** anyone can POST. |
+| **AI task drafts** | Working | `/api/ai/task-draft`: mock when `AI_DRAFTS_ENABLED`/`OPENAI_API_KEY`/`GEMINI_API_KEY` not set; OpenAI or Gemini when set. **No auth:** anyone can POST (should be hardened). |
+| **Student support needs** | Working | Teacher-only management in `/app/classes`; students cannot access `student_support_needs` table. |
+| **Student UI preferences** | Working | Students can customize UI (font, spacing, contrast) via `student_ui_prefs` table; settings persist and apply globally. |
 | **Demo Seed** | Working | `DEMO_SEED_ENABLED` + teacher/admin `userId` in body; API checks `profiles.role`. **Does not verify** that `userId` is the authenticated user. |
 | **Create Demo Users** | Working | Same as Demo Seed for env and role. **Same:** `userId` in body is not checked against the session. |
 | **Notifications / emails** | None | No Resend, SendGrid, or similar. |
@@ -175,7 +191,7 @@ These exist under `(protected)` but **not** under `(protected)/app`. The dashboa
 ### Build / Deploy Pitfalls
 - **.env.example:** If it contains real Supabase URLs/keys (instead of placeholders), treat as a critical leak; replace with placeholders and rotate any exposed keys.
 - **Supabase redirect URLs:** Add the production (and preview) base URL + `/app` in Supabase Auth → URL configuration.
-- **Migration order:** Run SQL in order: 001, 002, 003, 004, 003_update (after 004 so `attachment_path` exists), 005, 006, 007, 008, 009, 010, 012, 013. `submit_task` is redefined in 003_update and 005 to use `p_attachment_path`.
+- **Migration order:** Run SQL in order: 001, 002, 003, 003_update, 004, 005, 006, 007, 008, 009, 010, 012, 013, 014, 015, 016. `submit_task` is redefined in 003_update and 005 to use `p_attachment_path`.
 
 ---
 

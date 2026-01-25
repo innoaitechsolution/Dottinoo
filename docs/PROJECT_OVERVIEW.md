@@ -1,5 +1,13 @@
 # Dottinoo - Project Overview + MVP
 
+**Status:** Reference  
+**Last Updated:** 2026-01-25  
+**Purpose:** Elevator pitch, problem statement, feature inventory, MVP definition, deployment checklist, and technical architecture overview.
+
+---
+
+# Dottinoo - Project Overview + MVP
+
 ## PART 2 — PROJECT OVERVIEW + MVP
 
 ### 1. Elevator Pitch (UK Classroom Context)
@@ -65,8 +73,11 @@
 - ✅ Assign tasks to whole class or selected students
 - ✅ View student support needs and skill levels
 - ✅ Review submissions with feedback and stars
+- ✅ Quick feedback buttons for common responses
 - ✅ AI feedback suggestions (optional)
-- ✅ Reports page with CSV export
+- ✅ Reports page with CSV export and PDF export
+- ✅ Progress charts (stacked bar, line chart) on reports page
+- ✅ Student support needs management (teacher-only)
 - ✅ Demo seed and create-demo-users tools
 
 **Student Features:**
@@ -154,8 +165,14 @@
 
 - **`submissions`**: Student work submissions
   - `id`, `task_assignment_id` (unique), `student_id`
-  - `content` (text, max 5000 chars), `attachment_path` (storage path)
+  - `content` (text, max 5000 chars), `attachment_path` (storage path, not `attachment_url`)
   - `created_at`, `updated_at`
+
+- **`student_support_needs`**: Teacher-only support needs records (migration 016)
+  - `id`, `student_id` (unique), `created_by`, `dyslexia`, `adhd`, `autism`, `other_needs`, `updated_at`
+
+- **`student_ui_prefs`**: Student UI preferences (migration 016)
+  - `student_id` (PK), `font_scale`, `spacing`, `reduce_clutter`, `simplified_language`, `high_contrast`, `updated_at`
 
 - **`student_skill_profiles`**: Per-class digital skills tracking
   - `id`, `class_id`, `student_id`
@@ -224,10 +241,11 @@
 - **AI:** Switch to AI mode → enter brief → select students with support needs → generate → pre-fills → save
 
 **Minute 2-3: Student Experience**
-- Login as student → `/app/student`
+- Login as student → `/app` redirects to `/app/student`
 - Join class (invite code from teacher)
 - Show accessibility settings: change theme, font size, spacing → save → show visual changes
 - View assigned task → show AI help buttons (simplify, hints) → submit work
+- Note: Differentiation section is hidden from students (teacher-only in MVP)
 
 **Minute 3-4: Teacher Review**
 - Teacher opens task → see review queue
@@ -237,8 +255,9 @@
 **Minute 4-5: Reports**
 - Teacher → Reports → select class
 - Show summary stats (tasks, submissions, stars)
+- Show progress charts (stacked bar, line chart)
 - Show per-student breakdown
-- Export CSV
+- Export CSV or PDF
 
 **Minute 5-6: Differentiation & Skills (Optional)**
 - Show task differentiation (easier/standard/stretch)
@@ -307,9 +326,9 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
 SUPABASE_SERVICE_ROLE_KEY=xxx (for demo features)
 DEMO_SEED_ENABLED=true (optional, for demo)
-AI_ENABLED=true (optional)
-AI_PROVIDER=gemini (or mock)
-GEMINI_API_KEY=xxx (if using Gemini)
+AI_DRAFTS_ENABLED=true (optional)
+OPENAI_API_KEY=xxx (if using OpenAI) or GEMINI_API_KEY=xxx (if using Gemini)
+NEXT_PUBLIC_SITE_URL=https://your-domain.com (optional, for SEO metadata)
 ```
 
 **Supabase Configuration:**
@@ -328,9 +347,8 @@ GEMINI_API_KEY=xxx (if using Gemini)
 - [ ] Test teacher and student login flows
 
 **AI Setup (Optional):**
-- [ ] Set `AI_ENABLED=true`
-- [ ] Set `AI_PROVIDER=gemini`
-- [ ] Add `GEMINI_API_KEY` (server-side only)
+- [ ] Set `AI_DRAFTS_ENABLED=true`
+- [ ] Add `OPENAI_API_KEY` (if using OpenAI) or `GEMINI_API_KEY` (if using Gemini)
 - [ ] Test AI endpoints (should fallback to mock if misconfigured)
 
 **Pre-Launch Checks:**

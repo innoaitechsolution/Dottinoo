@@ -1,5 +1,13 @@
 # How to Demo - Quick Guide
 
+**Status:** Active  
+**Last Updated:** 2026-01-25  
+**Purpose:** Step-by-step demo guide for teacher and student flows, including setup, troubleshooting, and demo checklist.
+
+---
+
+# How to Demo - Quick Guide
+
 ## 🎯 Demo Setup
 
 ### 1. Run Database Migration
@@ -42,15 +50,15 @@ Before using student accessibility features, run this migration in Supabase SQL 
 3. Assign to class or selected students
 4. Click "Create Task"
 
-#### Option B: Template Task (⚠️ Needs UI Integration)
-- **Status:** Template library exists but needs UI integration
-- **Location:** `src/lib/templates/taskTemplates.ts` (8 templates ready)
-- **To Complete:** Add template selector to task creation page
+#### Option B: Template Task ✅
+- **Status:** Fully integrated and working
+- **Location:** `src/lib/templates/taskTemplates.ts` (8 templates available)
+- **How to use:** Select "Template" mode → Choose template → Form pre-fills → Edit → Save
 
-#### Option C: AI-Generated Task (⚠️ Needs UI Integration)
-- **Status:** AI API exists but needs UI integration
-- **API:** `/api/ai/task-draft` (works with mock or OpenAI)
-- **To Complete:** Add AI mode to task creation page
+#### Option C: AI-Generated Task ✅
+- **Status:** Fully integrated and working
+- **API:** `/api/ai/task-draft` (works with mock or OpenAI/Gemini)
+- **How to use:** Select "AI Assist" mode → Enter brief → Select students → Generate → Form pre-fills → Edit → Save
 
 ### Step 4: Review Submissions
 1. Go to "Tasks" → Click on a task
@@ -128,22 +136,16 @@ Before using student accessibility features, run this migration in Supabase SQL 
 ### ✅ Fully Working:
 - Role-based dashboards (`/app/teacher` and `/app/student`)
 - Role badges and user info display
-- Student accessibility settings (UI + persistence)
-- Manual task creation
+- Student accessibility settings (UI + persistence + CSS themes)
+- Task creation: Manual, Template (8 templates), and AI modes
 - Task assignment to classes/students
 - Student submission (text + file)
-- Teacher review (feedback + stars)
-- Reports with CSV export
+- Teacher review (feedback + stars + quick feedback buttons)
+- Reports with CSV export and PDF export
+- Progress charts (stacked bar, line chart)
 - Class management
 - Student skill profiles (in class management)
-
-### ⚠️ Needs Integration (Code Ready, UI Missing):
-- **Template Library:** 8 templates exist in code, need UI in task creation
-- **AI Draft:** API works, need UI in task creation
-- **Quick Feedback:** Need template buttons in review page
-
-### 📝 Needs CSS:
-- **Accessibility Themes:** Settings save but CSS rules need to be created to actually style pages
+- Student support needs management (teacher-only)
 
 ---
 
@@ -155,9 +157,9 @@ Before using student accessibility features, run this migration in Supabase SQL 
 - **SQL:** `SELECT id, role FROM profiles WHERE email = '<teacher_email>'`
 
 ### Student accessibility not working?
-- **Check:** Migration `014_ui_preferences.sql` has been run
-- **Check:** Settings are saving (check `profiles.ui_preferences` in database)
-- **Note:** CSS themes need to be created for visual changes
+- **Check:** Migrations `014_ui_preferences.sql` and `015_ui_preferences_rls.sql` have been run
+- **Check:** Settings are saving (check `profiles.ui_preferences` or `student_ui_prefs` in database)
+- **Check:** CSS themes are applied (check `src/app/accessibility.css` exists)
 
 ### Can't create tasks?
 - **Check:** Teacher has at least one class created
@@ -186,8 +188,10 @@ Before using student accessibility features, run this migration in Supabase SQL 
 
 ### Optional (If Time):
 - [ ] Show student skill profiles in class management
-- [ ] Show task differentiation (easier/standard/stretch)
+- [ ] Show task differentiation (easier/standard/stretch) - Note: Hidden from students in MVP
 - [ ] Show file upload in submission
+- [ ] Show PDF export from reports
+- [ ] Show progress charts on reports page
 
 ---
 
@@ -200,26 +204,14 @@ Before using student accessibility features, run this migration in Supabase SQL 
 
 ---
 
-## 📝 Next Steps to Complete Demo
+## ✅ Demo Status
 
-1. **Integrate Templates** (2-3 hours):
-   - Add mode selector to task creation
-   - Show template library
-   - Pre-fill form from template
+**All demo features are complete and working:**
+- ✅ Template library integrated (8 templates)
+- ✅ AI draft generation integrated
+- ✅ Quick feedback buttons added
+- ✅ Accessibility CSS themes implemented
+- ✅ Reports with PDF export and charts
+- ✅ Student support needs management
 
-2. **Integrate AI Draft** (2-3 hours):
-   - Add AI mode to task creation
-   - Create form for AI inputs
-   - Call API and populate form
-
-3. **Add Quick Feedback** (1-2 hours):
-   - Add template buttons to review page
-   - One-click feedback insertion
-
-4. **Create Accessibility CSS** (1-2 hours):
-   - Define theme colors
-   - Font size scaling
-   - Line spacing rules
-   - Letter case transforms
-
-**Total:** 6-10 hours for complete implementation
+**The platform is ready for demo day!**
