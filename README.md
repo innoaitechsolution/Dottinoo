@@ -29,8 +29,20 @@ A Next.js education platform for ages 14-24, built with TypeScript and Supabase 
 
 ## Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 20+ and npm (see [Node version](#node-version) below)
 - A Supabase project (free tier works)
+
+## Node version
+
+This project requires **Node.js 20 or higher**. Node.js 18 and below are deprecated and will no longer be supported in future versions of `@supabase/supabase-js`.
+
+If you're using `nvm` (Node Version Manager), you can automatically use the correct version:
+
+```bash
+nvm use
+```
+
+This will read the `.nvmrc` file in the project root and switch to Node 20.
 
 ## Setup Instructions
 
@@ -314,7 +326,7 @@ The core user flow for the pilot:
 2. **Configure Build Settings**
    - Build command: `npm run build`
    - Publish directory: `.next` (Next.js will handle this automatically)
-   - Node version: 18 or higher (set in Netlify UI or `netlify.toml`)
+   - Node version: 20 or higher (set in Netlify UI or `netlify.toml`)
 
 3. **Set Environment Variables**
    - Go to Site settings → Environment variables

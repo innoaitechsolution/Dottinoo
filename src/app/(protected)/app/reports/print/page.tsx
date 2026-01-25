@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { getMyProfile, Profile } from '@/lib/supabase/profile'
 import { getReportData, ClassReportData, ReportRange } from '@/lib/supabase/reports'
 import styles from './page.module.css'
 
-export default function PrintReportPage() {
+function PrintReportContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const classId = searchParams.get('classId')
@@ -173,5 +173,17 @@ export default function PrintReportPage() {
         <div>Page 1</div>
       </div>
     </div>
+  )
+}
+
+export default function PrintReportPage() {
+  return (
+    <Suspense fallback={
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading report...</div>
+      </div>
+    }>
+      <PrintReportContent />
+    </Suspense>
   )
 }

@@ -194,3 +194,29 @@ body {
 .high-contrast * {
   border-color: #000000 !important;
 }
+
+/* ============================================================================
+   PRINT STYLES FOR REPORTS PDF EXPORT
+   ============================================================================ */
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  /* Hide navigation and UI elements when printing */
+  nav,
+  header,
+  button,
+  .backButton,
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+}

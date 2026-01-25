@@ -176,6 +176,7 @@ export async function getReportData(
     const totalTasks = taskIds.length
     const totalAssignments = assignments?.length || 0
     const submittedCount = assignments?.filter(a => a.status === 'submitted' || a.status === 'reviewed').length || 0
+    const submittedOnlyCount = assignments?.filter(a => a.status === 'submitted').length || 0 // Only submitted, excluding reviewed
     const reviewedCount = assignments?.filter(a => a.status === 'reviewed').length || 0
     const totalStars = assignments?.reduce((sum, a) => sum + (a.stars_awarded || 0), 0) || 0
 

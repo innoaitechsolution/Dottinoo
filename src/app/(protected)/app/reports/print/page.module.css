@@ -133,21 +133,8 @@
 
 /* Print media queries */
 @media print {
-  body {
-    margin: 0;
-    padding: 0;
-    background: white;
-  }
-
-  /* Hide navigation and UI elements */
-  nav,
-  header,
-  button,
-  .backButton,
-  [role="navigation"] {
-    display: none !important;
-  }
-
+  /* Global print styles moved to globals.css to avoid CSS Modules restrictions */
+  
   .printContainer {
     padding: 15mm;
     box-shadow: none;
