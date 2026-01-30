@@ -172,27 +172,38 @@ export async function upsertStudentUiPrefs(
 }
 
 /**
- * Get student's own UI preferences (student can call this)
+ * Get student's own UI preferences (student can call this).
+ * Fails gracefully: on 404/401/403/network or missing table, returns { data: null, error: null } so callers can use defaults.
  */
 export async function getMyUiPrefs(): Promise<{ data: StudentUiPrefs | null; error: any }> {
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) {
-    return { data: null, error: { message: 'Not authenticated' } }
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { data: null, error: null }
+    }
+
+    const { data, error } = await supabase
+      .from('student_ui_prefs')
+      .select('*')
+      .eq('student_id', user.id)
+      .single()
+
+    // Any error (404, PGRST116, relation missing, etc.): return no prefs, no error — caller uses defaults
+    if (error) {
+      if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.log('[UI prefs] Fetch failed, using defaults:', error.message || error.code || error)
+      }
+      return { data: null, error: null }
+    }
+
+    return { data: data || null, error: null }
+  } catch (e) {
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.log('[UI prefs] Fetch failed, using defaults:', e)
+    }
+    return { data: null, error: null }
   }
-
-  const { data, error } = await supabase
-    .from('student_ui_prefs')
-    .select('*')
-    .eq('student_id', user.id)
-    .single()
-
-  // Return null if not found (not an error, just no prefs set yet)
-  if (error && error.code !== 'PGRST116') {
-    return { data: null, error }
-  }
-
-  return { data: data || null, error: null }
 }
 
 /**
@@ -277,8 +288,9 @@ export async function listStudentsWithNeeds(
     return { data: null, error: supportNeedsResult.error }
   }
 
-  if (uiPrefsResult.error) {
-    return { data: null, error: uiPrefsResult.error }
+  // If student_ui_prefs table is missing (404) or unavailable, continue with empty prefs so /app/classes still loads
+  if (uiPrefsResult.error && typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.log('[UI prefs] listStudentsWithNeeds: student_ui_prefs fetch failed, using empty prefs:', uiPrefsResult.error.message || uiPrefsResult.error)
   }
 
   // Build maps for quick lookup
@@ -291,6 +303,7 @@ export async function listStudentsWithNeeds(
   for (const prefs of uiPrefsResult.data || []) {
     uiPrefsMap.set(prefs.student_id, prefs)
   }
+  // When uiPrefsResult.error (e.g. 404), uiPrefsResult.data is empty; we use empty map so students get ui_prefs: null
 
   // Build result array
   const students: StudentWithNeeds[] = []
