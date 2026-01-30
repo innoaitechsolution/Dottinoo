@@ -143,25 +143,46 @@ Run the SQL migrations in order. All migration files are in `supabase/sql/`:
 - After running `006_profile_from_auth_metadata.sql`, ensure email confirmation is enabled in Supabase Auth settings
 - If you see "Failed to load classes" errors, ensure `007_rls_fixes.sql` and `008_fix_rls_recursion.sql` are run
 
-### 5. Set Up OAuth (Google)
+### 5. Supabase Auth → URL Configuration (required for email confirmation and OAuth)
+
+Configure URLs so email confirmation and OAuth redirects land on the correct site (production vs local).
+
+**Checklist (do in Supabase Dashboard):**
+
+1. Go to **Authentication** → **URL Configuration**
+2. Set **Site URL**:
+   - **Production:** `https://dottinoo.co.uk`
+   - For local dev, you can leave this as production; the app sends the current origin for redirects.
+3. Add **Redirect URLs** (one per line):
+   - `https://dottinoo.co.uk/auth/callback`
+   - `https://dottinoo.co.uk/**`
+   - `http://localhost:3000/auth/callback`
+   - `http://localhost:3000/**`
+4. **Email templates:** Ensure confirmation emails use the Site URL / redirect correctly (default templates use Site URL; no change needed if Site URL is set as above).
+
+**Why this matters:** If Site URL is wrong, "Confirm your email" links can send users to localhost in production. The app uses `emailRedirectTo` and `redirectTo` based on the current origin so production users land on `https://dottinoo.co.uk` and local users on `http://localhost:3000`.
+
+**Verification:** After configuring, confirm: (1) Local: email confirmation link returns the user to `http://localhost:3000/app`. (2) Production: email confirmation link returns the user to `https://dottinoo.co.uk/app`. (3) Google OAuth still completes and lands on `/app`.
+
+### 6. Set Up OAuth (Google)
 
 To enable Google OAuth sign-in:
 
 1. Go to Supabase Dashboard → **Authentication** → **Providers**
 2. Enable **Google** provider
 3. Add your Google OAuth credentials (Client ID and Client Secret)
-4. Add redirect URLs in Supabase:
-   - `http://localhost:3000/app` (for local development)
-   - `https://your-domain.com/app` (for production)
-   - `https://your-preview-url.netlify.app/app` (for Netlify previews)
+4. Add redirect URLs in Supabase (if not already added in step 5):
+   - `http://localhost:3000/auth/callback` (for local development)
+   - `https://dottinoo.co.uk/auth/callback` (for production)
+   - `https://your-preview-url.netlify.app/auth/callback` (for Netlify previews)
 
 **Callback URL Format:**
-- Supabase will redirect to: `{your-site-url}/app` after OAuth sign-in
-- Ensure this URL is added to both Supabase redirect URLs and your OAuth provider settings
+- Supabase redirects to `{your-site-url}/auth/callback?next=/app`; the app exchanges the code and sends the user to `/app`.
+- Ensure these URLs are in Supabase **Redirect URLs** and in your OAuth provider settings.
 
 **Note:** Apple and Microsoft OAuth are UI-ready but not configured. The UI will show a message directing users to use Email or Google.
 
-### 6. Run the Development Server
+### 7. Run the Development Server
 
 ```bash
 npm run dev

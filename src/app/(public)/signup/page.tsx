@@ -78,11 +78,15 @@ export default function SignUpPage() {
         }
       }
 
+      // Use current origin for email confirmation link so prod → dottinoo.co.uk, local → localhost
+      const emailRedirectTo =
+        typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : undefined
+
       // Sign up the user with metadata
       const { data, error: signUpError } = await signUp(email, password, {
         role: dbRole,
         full_name: fullName.trim() || null,
-      })
+      }, emailRedirectTo)
 
       if (signUpError) {
         setError(signUpError.message || 'Failed to create account. Please try again.')

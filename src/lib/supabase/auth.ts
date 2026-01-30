@@ -10,13 +10,15 @@ export interface SignUpMetadata {
 export async function signUp(
   email: string,
   password: string,
-  metadata?: SignUpMetadata
+  metadata?: SignUpMetadata,
+  emailRedirectTo?: string
 ) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: metadata || {},
+      ...(emailRedirectTo && { emailRedirectTo }),
     },
   })
 
