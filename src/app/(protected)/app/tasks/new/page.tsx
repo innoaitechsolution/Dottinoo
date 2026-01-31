@@ -314,7 +314,7 @@ function NewTaskPageContent() {
         throw new Error('Not authenticated')
       }
 
-      // Create task
+      // Create task (only columns from 002 so it works when 013 not applied; target_skill/target_level in 013)
       const { data: task, error: taskError } = await supabase
         .from('tasks')
         .insert({
@@ -327,14 +327,15 @@ function NewTaskPageContent() {
           success_criteria: successCriteria.filter(c => c.trim()).map(c => c.trim()),
           due_date: dueDate || null,
           creation_mode: mode,
-          target_skill: targetSkill || null,
-          target_level: targetLevel || null,
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (taskError) {
         throw taskError
+      }
+      if (!task) {
+        throw new Error('Task was not created. Please try again or check your connection.')
       }
 
       // Create task assignments based on assignment type

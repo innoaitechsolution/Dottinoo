@@ -166,10 +166,10 @@ export async function getReportData(
 
     const { data: assignments } = await assignmentsQuery
 
-    // Get students in class
+    // Get students in class (profiles has id, full_name only; email is in auth.users, not profiles)
     const { data: memberships } = await supabase
       .from('class_memberships')
-      .select('student_id, profiles!inner(id, full_name, email)')
+      .select('student_id, profiles!inner(id, full_name)')
       .eq('class_id', classId)
 
     // Calculate stats
@@ -180,14 +180,14 @@ export async function getReportData(
     const reviewedCount = assignments?.filter(a => a.status === 'reviewed').length || 0
     const totalStars = assignments?.reduce((sum, a) => sum + (a.stars_awarded || 0), 0) || 0
 
-    // Per-student stats
+    // Per-student stats (studentEmail not available from profiles table; use placeholder)
     const students: StudentReportData[] = (memberships || []).map((m: any) => {
       const studentId = m.student_id
       const studentAssignments = assignments?.filter(a => a.student_id === studentId) || []
       return {
         studentId,
         studentName: m.profiles?.full_name || 'Unknown',
-        studentEmail: m.profiles?.email || '',
+        studentEmail: (m.profiles as any)?.email ?? '',
         assignedTasks: studentAssignments.length,
         submittedTasks: studentAssignments.filter(a => a.status === 'submitted' || a.status === 'reviewed').length,
         reviewedTasks: studentAssignments.filter(a => a.status === 'reviewed').length,

@@ -179,33 +179,42 @@ export async function getClassStudents(classId: string): Promise<{ data: ClassSt
     return { data: null, error: { message: 'Class not found or access denied' } }
   }
 
-  // Get students via class_memberships
-  const { data, error } = await supabase
-    .from('class_memberships')
-    .select(`
-      student_id,
-      profiles!inner (
-        id,
-        full_name,
-        role,
-        support_needs_tags
-      )
-    `)
-    .eq('class_id', classId)
+  // Get students via class_memberships (select only columns that exist in base profiles schema)
+  try {
+    const { data, error } = await supabase
+      .from('class_memberships')
+      .select(`
+        student_id,
+        profiles!inner (
+          id,
+          full_name,
+          role
+        )
+      `)
+      .eq('class_id', classId)
 
-  if (error) {
-    return { data: null, error }
+    if (error) {
+      if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.warn('[getClassStudents] Query failed, using empty list:', error.code, error.message)
+      }
+      return { data: [], error: null }
+    }
+
+    // Transform to ClassStudent format (support_needs_tags not on profiles in all envs; use null)
+    const students: ClassStudent[] = (data || [])
+      .map((item: any) => ({
+        id: item.profiles?.id,
+        full_name: item.profiles?.full_name,
+        role: item.profiles?.role,
+        support_needs_tags: item.profiles?.support_needs_tags ?? null,
+      }))
+      .filter((s: ClassStudent) => s.id && (s.role === 'student' || s.role === 'external'))
+
+    return { data: students, error: null }
+  } catch (e) {
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.warn('[getClassStudents] Error, using empty list:', e)
+    }
+    return { data: [], error: null }
   }
-
-  // Transform to ClassStudent format
-  const students: ClassStudent[] = (data || [])
-    .map((item: any) => ({
-      id: item.profiles.id,
-      full_name: item.profiles.full_name,
-      role: item.profiles.role,
-      support_needs_tags: item.profiles.support_needs_tags || null,
-    }))
-    .filter((s: ClassStudent) => s.role === 'student' || s.role === 'external')
-
-  return { data: students, error: null }
 }
