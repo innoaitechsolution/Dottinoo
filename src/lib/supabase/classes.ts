@@ -197,7 +197,7 @@ export async function getClassStudents(classId: string): Promise<{ data: ClassSt
       if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
         console.warn('[getClassStudents] Query failed, using empty list:', error.code, error.message)
       }
-      return { data: [], error: null }
+      return { data: [], error }
     }
 
     // Transform to ClassStudent format (support_needs_tags not on profiles in all envs; use null)
@@ -215,6 +215,7 @@ export async function getClassStudents(classId: string): Promise<{ data: ClassSt
     if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
       console.warn('[getClassStudents] Error, using empty list:', e)
     }
-    return { data: [], error: null }
+    const err = e && typeof e === 'object' && 'message' in e ? e : { message: String(e) }
+    return { data: [], error: err }
   }
 }

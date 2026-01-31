@@ -48,6 +48,7 @@ export default function ClassesPage() {
 
   // Students with skills state (per class)
   const [studentsByClass, setStudentsByClass] = useState<Record<string, StudentWithSkills[]>>({})
+  const [studentsLoadError, setStudentsLoadError] = useState<string | null>(null)
   const [expandedClassId, setExpandedClassId] = useState<string | null>(null)
   const [isLoadingStudents, setIsLoadingStudents] = useState<Record<string, boolean>>({})
   const [isSavingSkills, setIsSavingSkills] = useState<Record<string, boolean>>({})
@@ -164,6 +165,7 @@ export default function ClassesPage() {
     }
 
     setExpandedClassId(classId)
+    setStudentsLoadError(null)
     setIsLoadingStudents({ ...isLoadingStudents, [classId]: true })
 
     // Load both skills and support needs in parallel
@@ -173,21 +175,20 @@ export default function ClassesPage() {
     ])
 
     if (skillsResult.error) {
-      setError(`Failed to load students: ${skillsResult.error.message}`)
+      setStudentsLoadError(skillsResult.error.message || 'Couldn\'t load students.')
+      setStudentsByClass({ ...studentsByClass, [classId]: [] })
       setIsLoadingStudents({ ...isLoadingStudents, [classId]: false })
-      return
+    } else {
+      const students = skillsResult.data || []
+      setStudentsByClass({ ...studentsByClass, [classId]: students })
+      setIsLoadingStudents({ ...isLoadingStudents, [classId]: false })
+      // Initialize local edits with current values
+      const edits: Record<string, Record<DigitalSkill, SkillLevel | null>> = {}
+      students.forEach(student => {
+        edits[student.id] = { ...student.skills }
+      })
+      setLocalSkillEdits(prev => ({ ...prev, [classId]: edits }))
     }
-
-    const students = skillsResult.data || []
-    setStudentsByClass({ ...studentsByClass, [classId]: students })
-    setIsLoadingStudents({ ...isLoadingStudents, [classId]: false })
-    
-    // Initialize local edits with current values
-    const edits: Record<string, Record<DigitalSkill, SkillLevel | null>> = {}
-    students.forEach(student => {
-      edits[student.id] = { ...student.skills }
-    })
-    setLocalSkillEdits(prev => ({ ...prev, [classId]: edits }))
 
     // Load support needs (ignore errors, just show empty if fails)
     if (!needsResult.error && needsResult.data) {
@@ -414,6 +415,11 @@ export default function ClassesPage() {
 
         {error && <div className={styles.errorMessage}>{error}</div>}
         {success && <div className={styles.successMessage}>{success}</div>}
+        {studentsLoadError && (
+          <div className={styles.studentsLoadBanner} role="alert">
+            Couldn&apos;t load students. Please refresh.
+          </div>
+        )}
 
         {/* Teacher: Create Class Form */}
         {isTeacher && (

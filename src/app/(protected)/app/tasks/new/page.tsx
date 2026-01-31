@@ -37,6 +37,7 @@ function NewTaskPageContent() {
   // Assignment state
   const [assignTo, setAssignTo] = useState<'whole_class' | 'selected_students'>('whole_class')
   const [classStudents, setClassStudents] = useState<ClassStudent[]>([])
+  const [studentsLoadError, setStudentsLoadError] = useState<string | null>(null)
   const [studentsWithSkills, setStudentsWithSkills] = useState<StudentWithSkills[]>([])
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set())
   const [isLoadingStudents, setIsLoadingStudents] = useState(false)
@@ -119,17 +120,22 @@ function NewTaskPageContent() {
     const loadStudents = async () => {
       if (!classId) {
         setClassStudents([])
+        setStudentsLoadError(null)
         setStudentsWithSkills([])
         setSelectedStudentIds(new Set())
         return
       }
 
       setIsLoadingStudents(true)
-      
+      setStudentsLoadError(null)
+
       // Load basic student list
       const { data: studentsData, error: studentsError } = await getClassStudents(classId)
       if (studentsError) {
-        console.error('Error loading students:', studentsError)
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.warn('[NewTask] getClassStudents failed:', studentsError)
+        }
+        setStudentsLoadError((studentsError as { message?: string })?.message || 'Couldn\'t load students.')
         setClassStudents([])
       } else {
         setClassStudents(studentsData || [])
@@ -411,6 +417,11 @@ function NewTaskPageContent() {
         <h1 className={styles.title}>Create New Task</h1>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
+        {studentsLoadError && (
+          <div className={styles.studentsLoadBanner} role="alert">
+            Couldn&apos;t load students. Please refresh.
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           {/* Class Selection */}

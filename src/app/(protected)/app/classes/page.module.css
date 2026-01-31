@@ -64,6 +64,16 @@
   margin-bottom: var(--spacing-lg);
 }
 
+.studentsLoadBanner {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: rgba(180, 81, 29, 0.08);
+  border: 1px solid var(--color-energy-orange);
+  border-radius: var(--radius-md);
+  color: var(--color-energy-orange);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-md);
+}
+
 .classesList {
   display: flex;
   flex-direction: column;
