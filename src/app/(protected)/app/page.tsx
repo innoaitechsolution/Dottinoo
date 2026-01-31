@@ -15,6 +15,15 @@ import Button from '@/components/Button'
 import StatusChip from '@/components/StatusChip'
 import styles from './page.module.css'
 
+/** Single source of truth for demo seed UI; invalid combinations are impossible. */
+type SeedState =
+  | { status: 'idle' }
+  | { status: 'running' }
+  | { status: 'success'; result: any }
+  | { status: 'error'; error: string }
+
+const initialSeedState: SeedState = { status: 'idle' }
+
 export default function AppPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
@@ -27,9 +36,7 @@ export default function AppPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [demoSeedEnabled, setDemoSeedEnabled] = useState(false)
-  const [isSeeding, setIsSeeding] = useState(false)
-  const [seedResult, setSeedResult] = useState<any>(null)
-  const [seedError, setSeedError] = useState<string | null>(null)
+  const [seedState, setSeedState] = useState<SeedState>(initialSeedState)
   const [isCreatingDemoUsers, setIsCreatingDemoUsers] = useState(false)
   const [demoUsersResult, setDemoUsersResult] = useState<any>(null)
   const [demoUsersError, setDemoUsersError] = useState<string | null>(null)
@@ -192,7 +199,7 @@ export default function AppPage() {
 
   const handleDemoSeed = async () => {
     if (!user?.id) {
-      setSeedError('User ID not available')
+      setSeedState({ status: 'error', error: 'User ID not available' })
       return
     }
 
@@ -208,9 +215,7 @@ export default function AppPage() {
 
     if (!confirmed) return
 
-    setIsSeeding(true)
-    setSeedError(null)
-    setSeedResult(null)
+    setSeedState({ status: 'running' })
 
     try {
       const response = await fetch('/api/demo/seed', {
@@ -224,18 +229,19 @@ export default function AppPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setSeedError(data.error || 'Failed to seed demo data')
-        setIsSeeding(false)
+        setSeedState({ status: 'error', error: data.error || 'Failed to seed demo data' })
         return
       }
 
-      setSeedResult(data)
-      setIsSeeding(false)
+      setSeedState({ status: 'success', result: data })
     } catch (error: any) {
-      setSeedError(error.message || 'Failed to seed demo data')
-      setIsSeeding(false)
+      setSeedState({ status: 'error', error: error.message || 'Failed to seed demo data' })
     }
   }
+
+  const isSeeding = seedState.status === 'running'
+  const seedError = seedState.status === 'error' ? seedState.error : null
+  const seedResult = seedState.status === 'success' ? seedState.result : null
 
   const handleCreateDemoUsers = async () => {
     if (!user?.id) {
