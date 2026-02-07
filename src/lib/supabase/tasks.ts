@@ -38,7 +38,14 @@ export interface TaskWithCounts extends TaskWithClass {
 }
 
 /**
- * List tasks for a teacher (tasks they created)
+ * Base columns that always exist on the tasks table (migration 002).
+ * target_skill and target_level are optional (migration 013/017).
+ */
+const TASKS_BASE_COLUMNS = 'id, class_id, created_by, title, instructions, steps, differentiation, success_criteria, due_date, creation_mode, created_at'
+
+/**
+ * List tasks for a teacher (tasks they created).
+ * Uses flat queries (no embedded joins) to avoid PostgREST 400s.
  */
 export async function listTasksForTeacher(): Promise<{ data: TaskWithClass[] | null; error: any }> {
   const { data: { user } } = await supabase.auth.getUser()
@@ -48,25 +55,65 @@ export async function listTasksForTeacher(): Promise<{ data: TaskWithClass[] | n
   }
 
   try {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select(`
-        *,
-        classes (
-          id,
-          name
-        )
-      `)
-      .eq('created_by', user.id)
-      .order('created_at', { ascending: false })
+    // First try with optional target columns
+    let data: any[] | null = null
+    let error: any = null
+
+    {
+      const res = await supabase
+        .from('tasks')
+        .select(`${TASKS_BASE_COLUMNS}, target_skill, target_level`)
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false })
+      data = res.data
+      error = res.error
+    }
+
+    // Fallback: if target_skill/target_level columns don't exist, retry without them
+    if (error && (error.message?.includes('target_skill') || error.message?.includes('target_level'))) {
+      if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.warn('[listTasksForTeacher] target columns missing, retrying without them:', error.message)
+      }
+      const retry = await supabase
+        .from('tasks')
+        .select(TASKS_BASE_COLUMNS)
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false })
+      data = retry.data
+      error = retry.error
+    }
 
     if (error) {
       if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
         console.warn('[listTasksForTeacher] Query error:', error.message, error.code, error.details, error.hint)
       }
+      return { data: null, error }
     }
 
-    return { data, error }
+    // Get class names separately (flat lookup, no embedded join)
+    const classIds = [...new Set((data || []).map((t: any) => t.class_id).filter(Boolean))]
+    const classesMap = new Map<string, string>()
+
+    if (classIds.length > 0) {
+      const { data: classesData } = await supabase
+        .from('classes')
+        .select('id, name')
+        .in('id', classIds)
+
+      for (const c of classesData || []) {
+        classesMap.set(c.id, c.name)
+      }
+    }
+
+    // Attach class info
+    const tasks: TaskWithClass[] = (data || []).map((t: any) => ({
+      ...t,
+      target_skill: t.target_skill ?? null,
+      target_level: t.target_level ?? null,
+      classes: t.class_id ? { id: t.class_id, name: classesMap.get(t.class_id) || 'Unknown Class' } : undefined,
+    }))
+
+    return { data: tasks, error: null }
   } catch (err: any) {
     return { data: null, error: { message: err.message || 'Failed to load teacher tasks' } }
   }
@@ -105,7 +152,7 @@ export async function listTasksForStudent(): Promise<{ data: TaskWithStatus[] | 
     if (taskIds.length > 0) {
       const { data: tasksData } = await supabase
         .from('tasks')
-        .select('id, class_id, created_by, title, instructions, steps, differentiation, success_criteria, due_date, creation_mode, created_at')
+        .select(TASKS_BASE_COLUMNS)
         .in('id', taskIds)
 
       for (const t of tasksData || []) {

@@ -114,24 +114,53 @@ export default function TaskDetailPage() {
         }
         setProfile(profileData)
 
-        // Load task
-        const { data: taskData, error: taskError } = await supabase
-          .from('tasks')
-          .select(`
-            *,
-            classes (
-              id,
-              name
-            )
-          `)
-          .eq('id', taskId)
-          .single()
+        // Load task — try with target columns first, fall back to base columns
+        const baseColumns = 'id, class_id, created_by, title, instructions, steps, differentiation, success_criteria, due_date, creation_mode, created_at'
+        let taskData: any = null
+        let taskError: any = null
+
+        {
+          const res = await supabase
+            .from('tasks')
+            .select(`${baseColumns}, target_skill, target_level`)
+            .eq('id', taskId)
+            .maybeSingle()
+          taskData = res.data
+          taskError = res.error
+        }
+
+        // Fallback: if target columns don't exist in schema, retry without them
+        if (taskError && (taskError.message?.includes('target_skill') || taskError.message?.includes('target_level'))) {
+          if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+            console.warn('[TaskDetailPage] target columns missing, retrying:', taskError.message)
+          }
+          const res = await supabase
+            .from('tasks')
+            .select(baseColumns)
+            .eq('id', taskId)
+            .maybeSingle()
+          taskData = res.data
+          taskError = res.error
+        }
 
         if (taskError || !taskData) {
           setError('Task not found')
           setIsLoading(false)
           return
         }
+
+        // Get class name separately (avoids embedded join issues)
+        if (taskData.class_id) {
+          const { data: classData } = await supabase
+            .from('classes')
+            .select('id, name')
+            .eq('id', taskData.class_id)
+            .maybeSingle()
+          if (classData) {
+            taskData.classes = classData
+          }
+        }
+
         setTask(taskData)
 
         if (profileData.role === 'student') {
