@@ -50,9 +50,11 @@ export default function StarsPage() {
             setRecentReviews(reviewsData || [])
           }
         }
-      } catch (err) {
-        console.error('Error loading data:', err)
-        setError('An unexpected error occurred')
+      } catch (err: any) {
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('[StarsPage] Error:', err?.message, err?.code, err?.details, err?.hint)
+        }
+        setError(err?.message || 'An unexpected error occurred')
       } finally {
         setIsLoading(false)
       }

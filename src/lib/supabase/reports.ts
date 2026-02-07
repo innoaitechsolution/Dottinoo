@@ -154,10 +154,10 @@ export async function getReportData(
       }
     }
 
-    // Get assignments with date filter
+    // Get assignments (flat select — no embedded join to avoid 400s)
     let assignmentsQuery = supabase
       .from('task_assignments')
-      .select('*, tasks!inner(class_id, created_at)')
+      .select('*')
       .in('task_id', taskIds)
 
     if (dateFilter?.from) {

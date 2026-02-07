@@ -72,8 +72,11 @@ export default function TeacherDashboard() {
         setTeacherClasses(classes || [])
         const { data: reviewData } = await listTeacherNeedsReview(3)
         setNeedsReview(reviewData || [])
-      } catch (err) {
-        console.error('Unexpected error:', err)
+      } catch (err: any) {
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('[TeacherDashboard] Error:', err?.message, err?.code, err?.details, err?.hint)
+        }
+        // Only redirect on auth errors, not data-loading errors
         router.push('/login')
       } finally {
         setIsLoading(false)

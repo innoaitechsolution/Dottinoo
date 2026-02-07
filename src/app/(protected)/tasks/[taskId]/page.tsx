@@ -157,9 +157,11 @@ export default function TaskDetailPage() {
           setReviewForms(forms)
           setSubmissionsMap(submissions)
         }
-      } catch (err) {
-        console.error('Error loading data:', err)
-        setError('Failed to load task')
+      } catch (err: any) {
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('[TaskDetailPage] Error:', err?.message, err?.code, err?.details, err?.hint)
+        }
+        setError(err?.message || 'Failed to load task')
       } finally {
         setIsLoading(false)
       }

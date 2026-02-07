@@ -45,8 +45,10 @@ function PrintReportContent() {
         } else {
           setReport(reportData)
         }
-      } catch (err) {
-        console.error('Error loading data:', err)
+      } catch (err: any) {
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('[PrintReport] Error:', err?.message, err?.code, err?.details, err?.hint)
+        }
       } finally {
         setIsLoading(false)
       }

@@ -135,8 +135,10 @@ export default function AppPage() {
             setStudentStats(stats)
           }
         }
-      } catch (err) {
-        console.error('Unexpected error:', err)
+      } catch (err: any) {
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('[AppPage] Error:', err?.message, err?.code, err?.details, err?.hint)
+        }
         router.push('/login')
       } finally {
         setIsLoading(false)

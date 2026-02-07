@@ -40,8 +40,10 @@ export default function ReportsPage() {
         setProfile(profileData)
         const { data: classesData } = await listMyClasses()
         setClasses(classesData || [])
-      } catch (err) {
-        console.error('Error loading data:', err)
+      } catch (err: any) {
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('[ReportsPage] Error:', err?.message, err?.code, err?.details, err?.hint)
+        }
         router.push('/login')
       } finally {
         setIsLoading(false)

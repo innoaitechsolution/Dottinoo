@@ -186,7 +186,7 @@ export default function NewTaskPage() {
         throw new Error('Not authenticated')
       }
 
-      // Create task
+      // Create task (base columns only; target_skill/target_level require migration 013/017)
       const { data: task, error: taskError } = await supabase
         .from('tasks')
         .insert({
@@ -201,10 +201,13 @@ export default function NewTaskPage() {
           creation_mode: mode,
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (taskError) {
         throw taskError
+      }
+      if (!task) {
+        throw new Error('Task was not created. Please try again.')
       }
 
       // Create task assignments for all students in the class
@@ -226,8 +229,12 @@ export default function NewTaskPage() {
 
       router.push('/app/tasks')
     } catch (err: any) {
-      console.error('Error creating task:', err)
-      setError(err.message || 'Failed to create task')
+      const errMsg = err?.message || 'Failed to create task'
+      const errCode = err?.code ? ` [${err.code}]` : ''
+      if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.error('Error creating task:', { message: errMsg, code: err?.code, details: err?.details, hint: err?.hint })
+      }
+      setError(`${errMsg}${errCode}`)
     } finally {
       setIsSubmitting(false)
     }

@@ -124,6 +124,7 @@ Run the SQL migrations in order. All migration files are in `supabase/sql/`:
 14. **014_ui_preferences.sql** - Adds UI preferences column to profiles
 15. **015_ui_preferences_rls.sql** - Ensures RLS allows UI preferences updates
 16. **016_student_support_needs.sql** - Creates student_support_needs and student_ui_prefs tables
+17. **017_tasks_target_skill_columns.sql** - Adds target_skill and target_level columns to tasks (safe/idempotent; also refreshes PostgREST schema cache)
 
 **To run migrations:**
 
@@ -404,6 +405,32 @@ The app is configured to build successfully on Netlify even if environment varia
 - **Static pages fail to generate**: Public pages should generate successfully. If they don't, check the build logs for specific errors
 - **OAuth redirect fails**: Ensure redirect URLs are added in both Supabase and your OAuth provider settings
 - **OG images not showing**: Ensure `NEXT_PUBLIC_SITE_URL` is set to your Netlify domain and `public/og/og-image.png` exists
+
+### Production CORS / Auth Issues
+
+If login fails with `"Failed to fetch"` or CORS errors in the browser console:
+
+1. **Verify environment variables in your host (Netlify/Vercel):**
+   - `NEXT_PUBLIC_SUPABASE_URL` must be the full URL (e.g. `https://<project-ref>.supabase.co`)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` must be the **anon/public** key (NOT the service role key)
+
+2. **Supabase Dashboard → Project Settings → API → CORS Allowed Origins** — add:
+   - `https://dottinoo.co.uk`
+   - `https://www.dottinoo.co.uk`
+   - `http://localhost:3000`
+   - Any Netlify preview domains (e.g. `https://*.netlify.app`)
+
+3. **Supabase Dashboard → Authentication → URL Configuration:**
+   - Site URL: `https://dottinoo.co.uk`
+   - Redirect URLs: `https://dottinoo.co.uk/**`, `http://localhost:3000/**`
+
+### Schema Cache / 400 Errors on Tasks
+
+If you see `"Could not find the 'target_level' column of 'tasks' in the schema cache"`:
+
+1. Run migration **017_tasks_target_skill_columns.sql** in the Supabase SQL Editor
+2. The migration includes `SELECT pg_notify('pgrst', 'reload schema')` to auto-refresh PostgREST
+3. If the error persists, run manually in SQL Editor: `SELECT pg_notify('pgrst', 'reload schema');`
 
 ## QA Checklist
 

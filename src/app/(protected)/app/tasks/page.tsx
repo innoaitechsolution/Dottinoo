@@ -85,9 +85,11 @@ export default function TasksPage() {
             setTaskStatuses(statuses)
           }
         }
-      } catch (err) {
-        console.error('Error loading data:', err)
-        setError('An unexpected error occurred')
+      } catch (err: any) {
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('[TasksPage] Error:', err?.message, err?.code, err?.details, err?.hint)
+        }
+        setError(err?.message || 'An unexpected error occurred')
       } finally {
         setIsLoading(false)
       }

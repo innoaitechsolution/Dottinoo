@@ -37,7 +37,8 @@ export default function LoginPage() {
       const { data, error: signInError } = await signIn(email, password)
 
       if (signInError) {
-        setError(signInError.message || 'Failed to sign in. Please try again.')
+        const msg = (signInError as any).message || 'Failed to sign in. Please try again.'
+        setError(msg)
         setIsLoading(false)
         return
       }
@@ -46,8 +47,14 @@ export default function LoginPage() {
         router.push('/app')
         router.refresh()
       }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.')
+    } catch (err: any) {
+      const message = err?.message || String(err)
+      const isCorsOrNetwork = message.includes('Failed to fetch') || message.includes('NetworkError') || message.includes('CORS')
+      setError(
+        isCorsOrNetwork
+          ? 'Unable to reach the server. Please check your connection and try again.'
+          : 'An unexpected error occurred. Please try again.'
+      )
       setIsLoading(false)
     }
   }

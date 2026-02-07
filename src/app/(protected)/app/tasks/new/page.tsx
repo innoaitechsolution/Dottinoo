@@ -144,7 +144,9 @@ function NewTaskPageContent() {
       // Load students with skill profiles
       const { data: skillsData, error: skillsError } = await getStudentsWithSkills(classId)
       if (skillsError) {
-        console.error('Error loading student skills:', skillsError)
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('Error loading student skills:', { message: skillsError.message, code: skillsError.code, details: skillsError.details, hint: skillsError.hint })
+        }
         setStudentsWithSkills([])
       } else {
         setStudentsWithSkills(skillsData || [])
@@ -320,22 +322,37 @@ function NewTaskPageContent() {
         throw new Error('Not authenticated')
       }
 
-      // Create task (only columns from 002 so it works when 013 not applied; target_skill/target_level in 013)
-      const { data: task, error: taskError } = await supabase
-        .from('tasks')
-        .insert({
-          class_id: classId,
-          created_by: user.id,
-          title: title.trim(),
-          instructions: instructions.trim(),
-          steps: steps.filter(s => s.trim()).map(s => s.trim()),
-          differentiation: differentiation,
-          success_criteria: successCriteria.filter(c => c.trim()).map(c => c.trim()),
-          due_date: dueDate || null,
-          creation_mode: mode,
-        })
-        .select()
-        .maybeSingle()
+      // Create task — includes target_skill/target_level (migration 017 ensures columns exist).
+      // If the columns are still missing (schema cache stale), retry without them.
+      const basePayload = {
+        class_id: classId,
+        created_by: user.id,
+        title: title.trim(),
+        instructions: instructions.trim(),
+        steps: steps.filter(s => s.trim()).map(s => s.trim()),
+        differentiation: differentiation,
+        success_criteria: successCriteria.filter(c => c.trim()).map(c => c.trim()),
+        due_date: dueDate || null,
+        creation_mode: mode,
+      }
+
+      let task: any = null
+      let taskError: any = null
+
+      // First attempt: include target fields
+      {
+        const payload = { ...basePayload, target_skill: targetSkill || null, target_level: targetLevel || null }
+        const res = await supabase.from('tasks').insert(payload).select().maybeSingle()
+        task = res.data
+        taskError = res.error
+      }
+
+      // Fallback: if target columns are not in schema cache, retry without them
+      if (taskError && (taskError.message?.includes('target_skill') || taskError.message?.includes('target_level') || taskError.code === 'PGRST204')) {
+        const res = await supabase.from('tasks').insert(basePayload).select().maybeSingle()
+        task = res.data
+        taskError = res.error
+      }
 
       if (taskError) {
         throw taskError
@@ -380,8 +397,14 @@ function NewTaskPageContent() {
 
       router.push('/app/tasks')
     } catch (err: any) {
-      console.error('Error creating task:', err)
-      setError(err.message || 'Failed to create task')
+      const errMsg = err?.message || 'Failed to create task'
+      const errDetails = err?.details ? ` (${err.details})` : ''
+      const errHint = err?.hint ? ` Hint: ${err.hint}` : ''
+      const errCode = err?.code ? ` [${err.code}]` : ''
+      if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.error('Error creating task:', { message: errMsg, code: err?.code, details: err?.details, hint: err?.hint })
+      }
+      setError(`${errMsg}${errDetails}${errHint}${errCode}`)
     } finally {
       setIsSubmitting(false)
     }

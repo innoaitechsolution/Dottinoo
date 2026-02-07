@@ -76,8 +76,11 @@ export default function StudentDashboard() {
             simplifiedLayout: profileData.ui_preferences.simplifiedLayout || false,
           })
         }
-      } catch (err) {
-        console.error('Unexpected error:', err)
+      } catch (err: any) {
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('[StudentDashboard] Error:', err?.message, err?.code, err?.details, err?.hint)
+        }
+        // Only redirect on auth errors, not data-loading errors
         router.push('/login')
       } finally {
         setIsLoading(false)

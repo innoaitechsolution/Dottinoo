@@ -23,8 +23,9 @@ export async function getSubmissionByAssignment(
     .from('submissions')
     .select('*')
     .eq('task_assignment_id', assignmentId)
-    .single()
+    .maybeSingle()
 
-  return { data, error }
+  // maybeSingle returns null (no error) when 0 rows, avoids PGRST116
+  return { data: data || null, error: error || null }
 }
 

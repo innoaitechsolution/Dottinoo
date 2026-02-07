@@ -39,9 +39,10 @@ export async function getMyAssignmentForTask(
     .select('*')
     .eq('task_id', taskId)
     .eq('student_id', user.id)
-    .single()
+    .maybeSingle()
 
-  return { data, error }
+  // maybeSingle returns null (no error) when 0 rows, avoids PGRST116
+  return { data: data || null, error: error || null }
 }
 
 /**

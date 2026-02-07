@@ -13,8 +13,10 @@ export interface Task {
   success_criteria: any[]
   due_date: string | null
   creation_mode: 'manual' | 'template' | 'ai'
-  target_skill: string | null
-  target_level: string | null
+  /** Added by migration 013; may be absent if 013 is not applied. */
+  target_skill?: string | null
+  /** Added by migration 013; may be absent if 013 is not applied. */
+  target_level?: string | null
   created_at: string
 }
 
@@ -45,19 +47,29 @@ export async function listTasksForTeacher(): Promise<{ data: TaskWithClass[] | n
     return { data: null, error: { message: 'Not authenticated' } }
   }
 
-  const { data, error } = await supabase
-    .from('tasks')
-    .select(`
-      *,
-      classes (
-        id,
-        name
-      )
-    `)
-    .eq('created_by', user.id)
-    .order('created_at', { ascending: false })
+  try {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select(`
+        *,
+        classes (
+          id,
+          name
+        )
+      `)
+      .eq('created_by', user.id)
+      .order('created_at', { ascending: false })
 
-  return { data, error }
+    if (error) {
+      if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.warn('[listTasksForTeacher] Query error:', error.message, error.code, error.details, error.hint)
+      }
+    }
+
+    return { data, error }
+  } catch (err: any) {
+    return { data: null, error: { message: err.message || 'Failed to load teacher tasks' } }
+  }
 }
 
 /**
@@ -72,69 +84,75 @@ export async function listTasksForStudent(): Promise<{ data: TaskWithStatus[] | 
   }
 
   try {
-    // Get student's assignments with task info
+    // Get student's assignments (flat select — no embedded join to avoid 400s from schema/RLS issues)
     const { data, error } = await supabase
       .from('task_assignments')
-      .select(`
-        id,
-        status,
-        stars_awarded,
-        created_at,
-        tasks!inner (
-          id,
-          class_id,
-          created_by,
-          title,
-          instructions,
-          steps,
-          differentiation,
-          success_criteria,
-          due_date,
-          creation_mode,
-          target_skill,
-          target_level,
-          created_at
-        )
-      `)
+      .select('id, task_id, status, stars_awarded, created_at')
       .eq('student_id', user.id)
-      .order('due_date', { foreignTable: 'tasks', ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false })
 
     if (error) {
+      if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.warn('[listTasksForStudent] Query error:', error.message, error.code, error.details, error.hint)
+      }
       return { data: null, error }
     }
 
-    // Get class names separately (to avoid RLS recursion with nested selects)
-    const classIds = [...new Set((data || []).map((item: any) => item.tasks?.class_id).filter(Boolean))]
-    const { data: classesData } = await supabase
-      .from('classes')
-      .select('id, name')
-      .in('id', classIds)
+    // Get task details separately
+    const taskIds = [...new Set((data || []).map((d: any) => d.task_id))]
+    const taskMap = new Map<string, any>()
 
-    const classesMap = new Map((classesData || []).map((c: any) => [c.id, c.name]))
+    if (taskIds.length > 0) {
+      const { data: tasksData } = await supabase
+        .from('tasks')
+        .select('id, class_id, created_by, title, instructions, steps, differentiation, success_criteria, due_date, creation_mode, created_at')
+        .in('id', taskIds)
+
+      for (const t of tasksData || []) {
+        taskMap.set(t.id, t)
+      }
+    }
+
+    // Get class names separately
+    const classIds = [...new Set([...taskMap.values()].map((t: any) => t.class_id).filter(Boolean))]
+    const classesMap = new Map<string, string>()
+
+    if (classIds.length > 0) {
+      const { data: classesData } = await supabase
+        .from('classes')
+        .select('id, name')
+        .in('id', classIds)
+
+      for (const c of classesData || []) {
+        classesMap.set(c.id, c.name)
+      }
+    }
 
     // Transform to TaskWithStatus format
-    const tasks: TaskWithStatus[] = (data || []).map((item: any) => ({
-      id: item.tasks?.id || '',
-      class_id: item.tasks?.class_id || '',
-      created_by: item.tasks?.created_by || '',
-      title: item.tasks?.title || 'Unknown Task',
-      instructions: item.tasks?.instructions || '',
-      steps: item.tasks?.steps || [],
-      differentiation: item.tasks?.differentiation || {},
-      success_criteria: item.tasks?.success_criteria || [],
-      due_date: item.tasks?.due_date || null,
-      creation_mode: (item.tasks?.creation_mode || 'manual') as 'manual' | 'template' | 'ai',
-      target_skill: item.tasks?.target_skill || null,
-      target_level: item.tasks?.target_level || null,
-      created_at: item.tasks?.created_at || item.created_at,
-      classes: item.tasks?.class_id ? {
-        id: item.tasks.class_id,
-        name: classesMap.get(item.tasks.class_id) || 'Unknown Class',
-      } : undefined,
-      assignmentStatus: item.status as 'not_started' | 'in_progress' | 'submitted' | 'reviewed',
-      starsAwarded: item.stars_awarded || 0,
-    }))
+    const tasks: TaskWithStatus[] = (data || []).map((item: any) => {
+      const t = taskMap.get(item.task_id)
+      return {
+        id: t?.id || item.task_id,
+        class_id: t?.class_id || '',
+        created_by: t?.created_by || '',
+        title: t?.title || 'Unknown Task',
+        instructions: t?.instructions || '',
+        steps: t?.steps || [],
+        differentiation: t?.differentiation || {},
+        success_criteria: t?.success_criteria || [],
+        due_date: t?.due_date || null,
+        creation_mode: (t?.creation_mode || 'manual') as 'manual' | 'template' | 'ai',
+        target_skill: t?.target_skill ?? null,
+        target_level: t?.target_level ?? null,
+        created_at: t?.created_at || item.created_at,
+        classes: t?.class_id ? {
+          id: t.class_id,
+          name: classesMap.get(t.class_id) || 'Unknown Class',
+        } : undefined,
+        assignmentStatus: item.status as 'not_started' | 'in_progress' | 'submitted' | 'reviewed',
+        starsAwarded: item.stars_awarded || 0,
+      }
+    })
 
     return { data: tasks, error: null }
   } catch (err: any) {
