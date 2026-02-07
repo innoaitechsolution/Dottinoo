@@ -406,6 +406,32 @@ The app is configured to build successfully on Netlify even if environment varia
 - **OAuth redirect fails**: Ensure redirect URLs are added in both Supabase and your OAuth provider settings
 - **OG images not showing**: Ensure `NEXT_PUBLIC_SITE_URL` is set to your Netlify domain and `public/og/og-image.png` exists
 
+### Windows Build Fails (`EPERM .next/trace`)
+
+If `npm run build` fails with `Error: EPERM: operation not permitted, open '...\.next\trace'`:
+
+1. **Stop the dev server** (`Ctrl+C` in the terminal running `next dev`).
+2. **Kill lingering Node processes** (PowerShell, run as Administrator if needed):
+   ```powershell
+   taskkill /F /IM node.exe
+   ```
+3. **Remove the `.next` folder** (the `clean` script does this for you):
+   ```bash
+   npm run clean
+   ```
+   Or manually:
+   ```powershell
+   Remove-Item -Recurse -Force .next
+   ```
+4. **Run the build again**:
+   ```bash
+   npm run build
+   ```
+
+The `prebuild` script in `package.json` now runs `rimraf .next` automatically before every build, which prevents stale lock files from blocking the build.
+
+**Common causes:** VSCode file watcher, Windows Defender / Controlled Folder Access, OneDrive sync. If the error keeps returning, exclude the project folder from OneDrive sync and add it to Defender's exclusion list.
+
 ### Production CORS / Auth Issues
 
 If login fails with `"Failed to fetch"` or CORS errors in the browser console:

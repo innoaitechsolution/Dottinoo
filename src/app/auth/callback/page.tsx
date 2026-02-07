@@ -1,14 +1,30 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 
 /**
  * Auth callback page: handles email confirmation and OAuth redirects.
  * Exchanges the auth code for a session and redirects to /app (or safe default).
+ *
+ * Wrapped in Suspense because useSearchParams() requires it in Next.js 14+.
  */
 export default function AuthCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>Loading…</p>
+        </div>
+      }
+    >
+      <AuthCallbackInner />
+    </Suspense>
+  )
+}
+
+function AuthCallbackInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'error'>('loading')

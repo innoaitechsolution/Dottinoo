@@ -4,21 +4,23 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "rimraf .next",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "rimraf .next"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
     "next": "^14.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@supabase/supabase-js": "^2.38.0"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "rimraf": "^5.0.10",
     "typescript": "^5.0.0"
   }
 }
-
