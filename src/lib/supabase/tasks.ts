@@ -271,6 +271,8 @@ export async function listTasksForStudent(): Promise<{ data: TaskWithStatus[] | 
   }
 
   try {
+    if (isDev) console.log(`[listTasksForStudent] Fetching assignments for user.id=${user.id}`)
+
     // Get student's assignments (flat select — no embedded join to avoid 400s from schema/RLS issues)
     const { data, error } = await supabase
       .from('task_assignments')
@@ -279,25 +281,39 @@ export async function listTasksForStudent(): Promise<{ data: TaskWithStatus[] | 
       .order('created_at', { ascending: false })
 
     if (error) {
-      if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
-        console.warn('[listTasksForStudent] Query error:', error.message, error.code, error.details, error.hint)
-      }
+      if (isDev) console.warn('[listTasksForStudent] task_assignments query error:', error.message, error.code, error.details, error.hint)
       return { data: null, error }
     }
 
+    if (isDev) console.log(`[listTasksForStudent] Found ${(data || []).length} assignment rows`)
+
+    if (!data || data.length === 0) {
+      // No assignments at all — return empty immediately
+      return { data: [], error: null }
+    }
+
     // Get task details separately
-    const taskIds = [...new Set((data || []).map((d: any) => d.task_id))]
+    const taskIds = [...new Set(data.map((d: any) => d.task_id))]
+
+    const { data: tasksData, error: tasksError } = await supabase
+      .from('tasks')
+      .select(TASKS_BASE_COLUMNS)
+      .in('id', taskIds)
+
+    if (tasksError) {
+      if (isDev) console.warn('[listTasksForStudent] tasks query error:', tasksError.message, tasksError.code, tasksError.details, tasksError.hint)
+    }
+
     const taskMap = new Map<string, any>()
+    for (const t of tasksData || []) {
+      taskMap.set(t.id, t)
+    }
 
-    if (taskIds.length > 0) {
-      const { data: tasksData } = await supabase
-        .from('tasks')
-        .select(TASKS_BASE_COLUMNS)
-        .in('id', taskIds)
-
-      for (const t of tasksData || []) {
-        taskMap.set(t.id, t)
-      }
+    if (isDev) {
+      const resolved = taskIds.filter(id => taskMap.has(id)).length
+      const missing = taskIds.filter(id => !taskMap.has(id))
+      console.log(`[listTasksForStudent] Resolved ${resolved}/${taskIds.length} tasks`)
+      if (missing.length > 0) console.warn('[listTasksForStudent] Could not load task details for IDs (RLS?):', missing)
     }
 
     // Get class names separately
@@ -316,7 +332,7 @@ export async function listTasksForStudent(): Promise<{ data: TaskWithStatus[] | 
     }
 
     // Transform to TaskWithStatus format
-    const tasks: TaskWithStatus[] = (data || []).map((item: any) => {
+    const tasks: TaskWithStatus[] = data.map((item: any) => {
       const t = taskMap.get(item.task_id)
       return {
         id: t?.id || item.task_id,
@@ -341,8 +357,10 @@ export async function listTasksForStudent(): Promise<{ data: TaskWithStatus[] | 
       }
     })
 
+    if (isDev) console.log(`[listTasksForStudent] Returning ${tasks.length} tasks`)
     return { data: tasks, error: null }
   } catch (err: any) {
+    if (isDev) console.error('[listTasksForStudent] Unexpected error:', err)
     return { data: null, error: { message: err.message || 'Failed to load student tasks' } }
   }
 }

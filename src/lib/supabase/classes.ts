@@ -154,12 +154,31 @@ export async function joinClassByCode(inviteCode: string): Promise<{ data: strin
 export interface ClassStudent {
   id: string
   full_name: string | null
+  /** Display label for the student (resolved from full_name, role, or id fallback) */
+  label: string
   role: string
   support_needs_tags?: string[] | null
 }
 
+const isDev = typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
+
 /**
- * Get list of students in a class (teacher only)
+ * Build a display label for a student.
+ * Priority: full_name → "Student <short-id>" fallback.
+ */
+function studentLabel(id: string, fullName: string | null): string {
+  if (fullName && fullName.trim()) return fullName.trim()
+  return `Student ${id.slice(0, 8)}…`
+}
+
+/**
+ * Get list of students in a class (teacher only).
+ *
+ * Uses flat queries (no embedded joins) to avoid PostgREST/RLS issues:
+ *   1. class_memberships → student_id list
+ *   2. profiles → id, full_name, role
+ *
+ * Requires migration 019 (profiles SELECT policy for teachers).
  */
 export async function getClassStudents(classId: string): Promise<{ data: ClassStudent[] | null; error: any }> {
   const { data: { user } } = await supabase.auth.getUser()
@@ -179,42 +198,71 @@ export async function getClassStudents(classId: string): Promise<{ data: ClassSt
     return { data: null, error: { message: 'Class not found or access denied' } }
   }
 
-  // Get students via class_memberships (select only columns that exist in base profiles schema)
   try {
-    const { data, error } = await supabase
+    // Step 1: Get membership rows (flat — no join)
+    const { data: memberships, error: membershipError } = await supabase
       .from('class_memberships')
-      .select(`
-        student_id,
-        profiles!inner (
-          id,
-          full_name,
-          role
-        )
-      `)
+      .select('student_id')
       .eq('class_id', classId)
 
-    if (error) {
-      if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
-        console.warn('[getClassStudents] Query failed, using empty list:', error.code, error.message)
-      }
-      return { data: [], error }
+    if (membershipError) {
+      if (isDev) console.warn('[getClassStudents] class_memberships query failed:', membershipError.message, membershipError.code)
+      return { data: [], error: membershipError }
     }
 
-    // Transform to ClassStudent format (support_needs_tags not on profiles in all envs; use null)
-    const students: ClassStudent[] = (data || [])
-      .map((item: any) => ({
-        id: item.profiles?.id,
-        full_name: item.profiles?.full_name,
-        role: item.profiles?.role,
-        support_needs_tags: item.profiles?.support_needs_tags ?? null,
+    const studentIds = (memberships || []).map(m => m.student_id)
+
+    if (isDev) console.log(`[getClassStudents] class_id=${classId}: ${studentIds.length} membership rows`)
+
+    if (studentIds.length === 0) {
+      return { data: [], error: null }
+    }
+
+    // Step 2: Get profiles for those students
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, full_name, role')
+      .in('id', studentIds)
+
+    if (profilesError) {
+      if (isDev) console.warn('[getClassStudents] profiles query failed:', profilesError.message, profilesError.code)
+      // Fall back: return students with id-only labels so the picker still works
+      const fallback: ClassStudent[] = studentIds.map(sid => ({
+        id: sid,
+        full_name: null,
+        label: studentLabel(sid, null),
+        role: 'student',
       }))
-      .filter((s: ClassStudent) => s.id && (s.role === 'student' || s.role === 'external'))
+      return { data: fallback, error: profilesError }
+    }
+
+    // Build a map of profile data
+    const profileMap = new Map<string, { full_name: string | null; role: string }>()
+    for (const p of profilesData || []) {
+      profileMap.set(p.id, { full_name: p.full_name, role: p.role })
+    }
+
+    // Build student list — include ALL membership IDs, even those without a profile row
+    const students: ClassStudent[] = studentIds
+      .map(sid => {
+        const p = profileMap.get(sid)
+        return {
+          id: sid,
+          full_name: p?.full_name ?? null,
+          label: studentLabel(sid, p?.full_name ?? null),
+          role: p?.role ?? 'student',
+        }
+      })
+      .filter(s => s.role === 'student' || s.role === 'external')
+
+    if (isDev) {
+      const resolved = students.filter(s => s.full_name).length
+      console.log(`[getClassStudents] Resolved ${resolved}/${students.length} names. First 3:`, students.slice(0, 3).map(s => s.label))
+    }
 
     return { data: students, error: null }
   } catch (e) {
-    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
-      console.warn('[getClassStudents] Error, using empty list:', e)
-    }
+    if (isDev) console.warn('[getClassStudents] Unexpected error:', e)
     const err = e && typeof e === 'object' && 'message' in e ? e : { message: String(e) }
     return { data: [], error: err }
   }

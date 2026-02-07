@@ -56,89 +56,102 @@ export async function getStudentsWithSkills(classId: string): Promise<{ data: St
     return { data: null, error: { message: 'Class not found or access denied' } }
   }
 
-  // Get students in the class
+  const isDev = typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
+
+  // Step 1: flat membership query (no embedded join)
   const { data: memberships, error: membershipError } = await supabase
     .from('class_memberships')
-    .select(`
-      student_id,
-      profiles!inner (
-        id,
-        full_name,
-        role
-      )
-    `)
+    .select('student_id')
     .eq('class_id', classId)
 
   if (membershipError) {
+    if (isDev) console.warn('[getStudentsWithSkills] membership query failed:', membershipError.message)
     return { data: null, error: membershipError }
   }
 
-  // Get skill profiles for these students in this class
-  const studentIds = (memberships || [])
-    .filter((m: any) => {
-      const profile = m.profiles
-      return profile && (profile.role === 'student' || profile.role === 'external')
-    })
-    .map((m: any) => m.profiles.id)
+  const allStudentIds = (memberships || []).map(m => m.student_id)
+  if (allStudentIds.length === 0) {
+    return { data: [], error: null }
+  }
+
+  // Step 2: flat profiles query
+  const { data: profilesData, error: profilesError } = await supabase
+    .from('profiles')
+    .select('id, full_name, role')
+    .in('id', allStudentIds)
+
+  if (profilesError) {
+    if (isDev) console.warn('[getStudentsWithSkills] profiles query failed:', profilesError.message)
+  }
+
+  // Build a profile map
+  const profileMap = new Map<string, { full_name: string | null; role: string }>()
+  for (const p of profilesData || []) {
+    profileMap.set(p.id, { full_name: p.full_name, role: p.role })
+  }
+
+  // Filter to students/external only
+  const studentIds = allStudentIds.filter(sid => {
+    const p = profileMap.get(sid)
+    return !p || p.role === 'student' || p.role === 'external'
+  })
 
   if (studentIds.length === 0) {
     return { data: [], error: null }
   }
 
-  const { data: profiles, error: profilesError } = await supabase
+  // Step 3: skill profiles
+  const { data: skillData, error: skillError } = await supabase
     .from('student_skill_profiles')
     .select('*')
     .eq('class_id', classId)
     .in('student_id', studentIds)
 
-  if (profilesError) {
-    return { data: null, error: profilesError }
+  if (skillError) {
+    if (isDev) console.warn('[getStudentsWithSkills] skill profiles query failed:', skillError.message)
+    return { data: null, error: skillError }
   }
 
   // Build skills map per student
   const skillsMap = new Map<string, Record<DigitalSkill, SkillLevel | null>>()
-  
-  // Initialize all students with null skills
-  for (const membership of memberships || []) {
-    const profile = (membership as any).profiles
-    if (profile && typeof profile === 'object' && 'role' in profile && (profile.role === 'student' || profile.role === 'external')) {
-      skillsMap.set(profile.id, {
+
+  const emptySkills = (): Record<DigitalSkill, SkillLevel | null> => ({
+    digital_safety: null,
+    search_information: null,
+    communication: null,
+    productivity: null,
+    ai_literacy: null,
+  })
+
+  for (const sid of studentIds) {
+    skillsMap.set(sid, emptySkills())
+  }
+
+  for (const row of skillData || []) {
+    const studentSkills = skillsMap.get(row.student_id)
+    if (studentSkills && row.skill_key in studentSkills) {
+      const skillKey = row.skill_key as DigitalSkill
+      studentSkills[skillKey] = row.level
+    }
+  }
+
+  // Build result array
+  const students: StudentWithSkills[] = studentIds.map(sid => {
+    const p = profileMap.get(sid)
+    return {
+      id: sid,
+      full_name: p?.full_name ?? null,
+      skills: skillsMap.get(sid) || {
         digital_safety: null,
         search_information: null,
         communication: null,
         productivity: null,
         ai_literacy: null,
-      })
+      },
     }
-  }
+  })
 
-  // Fill in existing profiles
-  for (const profile of profiles || []) {
-    const studentSkills = skillsMap.get(profile.student_id)
-    if (studentSkills && profile.skill_key in studentSkills) {
-      const skillKey = profile.skill_key as DigitalSkill
-      studentSkills[skillKey] = profile.level
-    }
-  }
-
-  // Build result array
-  const students: StudentWithSkills[] = []
-  for (const membership of memberships || []) {
-    const profile = (membership as any).profiles
-    if (profile && typeof profile === 'object' && 'role' in profile && (profile.role === 'student' || profile.role === 'external')) {
-      students.push({
-        id: profile.id,
-        full_name: profile.full_name,
-        skills: skillsMap.get(profile.id) || {
-          digital_safety: null,
-          search_information: null,
-          communication: null,
-          productivity: null,
-          ai_literacy: null,
-        },
-      })
-    }
-  }
+  if (isDev) console.log(`[getStudentsWithSkills] class_id=${classId}: ${students.length} students, ${(skillData || []).length} skill rows`)
 
   return { data: students, error: null }
 }

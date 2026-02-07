@@ -14,6 +14,8 @@ import Select from '@/components/Select'
 import BackButton from '@/components/BackButton'
 import styles from './page.module.css'
 
+const isDev = typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
+
 type CreationMode = 'manual' | 'template' | 'ai'
 
 function NewTaskPageContent() {
@@ -315,6 +317,11 @@ function NewTaskPageContent() {
       return
     }
 
+    if (assignTo === 'whole_class' && classStudents.length === 0) {
+      setError('This class has no students yet. Students must join using the class invite code before you can assign tasks.')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -367,13 +374,20 @@ function NewTaskPageContent() {
       
       if (assignTo === 'whole_class') {
         // Assign to all students in the class
-        const { data: memberships } = await supabase
+        const { data: memberships, error: membershipError } = await supabase
           .from('class_memberships')
           .select('student_id')
           .eq('class_id', classId)
 
+        if (membershipError) {
+          if (isDev) console.error('[CreateTask] Failed to load class memberships:', { message: membershipError.message, code: membershipError.code, details: membershipError.details, hint: membershipError.hint })
+          throw new Error(`Could not load students for this class: ${membershipError.message}${membershipError.code ? ` [${membershipError.code}]` : ''}`)
+        }
+
         if (memberships && memberships.length > 0) {
           studentIdsToAssign = memberships.map(m => m.student_id)
+        } else {
+          if (isDev) console.warn('[CreateTask] No students found in class_memberships for class_id:', classId)
         }
       } else {
         // Assign only to selected students
@@ -381,6 +395,8 @@ function NewTaskPageContent() {
       }
 
       if (studentIdsToAssign.length > 0) {
+        if (isDev) console.log(`[CreateTask] Inserting ${studentIdsToAssign.length} task_assignments for task ${task.id}`)
+
         const assignments = studentIdsToAssign.map(studentId => ({
           task_id: task.id,
           student_id: studentId,
@@ -392,8 +408,33 @@ function NewTaskPageContent() {
           .insert(assignments)
 
         if (assignmentError) {
-          throw assignmentError
+          if (isDev) console.error('[CreateTask] task_assignments INSERT failed:', { message: assignmentError.message, code: assignmentError.code, details: assignmentError.details, hint: assignmentError.hint })
+          throw new Error(`Task created, but assigning students failed: ${assignmentError.message}${assignmentError.code ? ` [${assignmentError.code}]` : ''}`)
         }
+
+        if (isDev) console.log(`[CreateTask] Successfully assigned ${studentIdsToAssign.length} students`)
+
+        // Dev-only: verify assignments are visible to the first assigned student
+        if (isDev) {
+          const checkStudentId = studentIdsToAssign[0]
+          const { data: verifyRows, error: verifyErr } = await supabase
+            .from('task_assignments')
+            .select('id, student_id, status')
+            .eq('task_id', task.id)
+          if (verifyErr) {
+            console.warn('[CreateTask][verify] Could not read back assignments:', verifyErr.message, verifyErr.code)
+          } else {
+            console.log(`[CreateTask][verify] task_assignments for task ${task.id}: ${(verifyRows || []).length} rows`)
+            const found = (verifyRows || []).find((r: any) => r.student_id === checkStudentId)
+            if (found) {
+              console.log(`[CreateTask][verify] ✓ Student ${checkStudentId.slice(0, 8)}... has assignment row (status: ${found.status})`)
+            } else {
+              console.warn(`[CreateTask][verify] ✗ Student ${checkStudentId.slice(0, 8)}... NOT found in task_assignments — check RLS policies`)
+            }
+          }
+        }
+      } else {
+        if (isDev) console.warn('[CreateTask] No students to assign — task created without assignments')
       }
 
       invalidateTaskCaches() // bust cache so tasks list refreshes
@@ -526,7 +567,7 @@ function NewTaskPageContent() {
                     }}
                     disabled={isSubmitting}
                   />
-                  <span>Whole class</span>
+                  <span>Whole class{!isLoadingStudents && classStudents.length > 0 ? ` (${classStudents.length} students)` : ''}</span>
                 </label>
                 <label className={styles.radioLabel}>
                   <input
@@ -541,13 +582,28 @@ function NewTaskPageContent() {
                 </label>
               </div>
 
+              {/* Warning: no students in class (shown for both modes) */}
+              {!isLoadingStudents && classStudents.length === 0 && classId && (
+                <div className={styles.studentsLoadBanner} role="alert">
+                  <strong>This class has no students yet.</strong>{' '}
+                  {(() => {
+                    const selectedClass = classes.find(c => c.id === classId)
+                    return selectedClass ? (
+                      <>Share the invite code <strong style={{ fontFamily: 'monospace', letterSpacing: '0.05em' }}>{selectedClass.invite_code}</strong> with your students so they can join on the <a href="/app/classes" style={{ textDecoration: 'underline' }}>Classes</a> page.</>
+                    ) : (
+                      <>Students must join using the class invite code. <a href="/app/classes" style={{ textDecoration: 'underline' }}>Manage classes &amp; invite codes</a></>
+                    )
+                  })()}
+                </div>
+              )}
+
               {/* Student Selection (when "Selected students" is chosen) */}
               {assignTo === 'selected_students' && (
                 <div className={styles.studentSelection}>
                   {isLoadingStudents ? (
                     <p>Loading students...</p>
                   ) : classStudents.length === 0 ? (
-                    <p className={styles.emptyMessage}>No students in this class yet.</p>
+                    <p className={styles.emptyMessage}>No students found. See the message above.</p>
                   ) : (
                     <>
                       <div className={styles.studentCheckboxes}>
@@ -576,7 +632,7 @@ function NewTaskPageContent() {
                                 disabled={isSubmitting}
                               />
                               <span className={styles.studentName}>
-                                {student.full_name || `Student ${student.id.slice(0, 8)}`}
+                                {student.label || student.full_name || `Student ${student.id.slice(0, 8)}`}
                               </span>
                               {studentSkills && (
                                 <div className={styles.studentSkills}>

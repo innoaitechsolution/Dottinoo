@@ -11,6 +11,8 @@ import Input from '@/components/Input'
 import Select from '@/components/Select'
 import styles from './page.module.css'
 
+const isDev = typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
+
 type CreationMode = 'manual' | 'template' | 'ai'
 
 export default function NewTaskPage() {
@@ -211,24 +213,49 @@ export default function NewTaskPage() {
       }
 
       // Create task assignments for all students in the class
-      const { data: memberships } = await supabase
+      const { data: memberships, error: membershipError } = await supabase
         .from('class_memberships')
         .select('student_id')
         .eq('class_id', classId)
 
-      if (memberships && memberships.length > 0) {
-        const assignments = memberships.map(m => ({
-          task_id: task.id,
-          student_id: m.student_id,
-          status: 'not_started',
-        }))
+      if (membershipError) {
+        if (isDev) console.error('[CreateTask] Failed to load class memberships:', { message: membershipError.message, code: membershipError.code, details: membershipError.details, hint: membershipError.hint })
+        throw new Error(`Could not load students for this class: ${membershipError.message}${membershipError.code ? ` [${membershipError.code}]` : ''}`)
+      }
 
-        const { error: assignmentError } = await supabase
+      if (!memberships || memberships.length === 0) {
+        if (isDev) console.warn('[CreateTask] No students found in class_memberships for class_id:', classId)
+        throw new Error('This class has no students yet. Students must join using the class invite code before you can assign tasks.')
+      }
+
+      if (isDev) console.log(`[CreateTask] Inserting ${memberships.length} task_assignments for task ${task.id}`)
+
+      const assignments = memberships.map(m => ({
+        task_id: task.id,
+        student_id: m.student_id,
+        status: 'not_started',
+      }))
+
+      const { error: assignmentError } = await supabase
+        .from('task_assignments')
+        .insert(assignments)
+
+      if (assignmentError) {
+        if (isDev) console.error('[CreateTask] task_assignments INSERT failed:', { message: assignmentError.message, code: assignmentError.code, details: assignmentError.details, hint: assignmentError.hint })
+        throw new Error(`Task created, but assigning students failed: ${assignmentError.message}${assignmentError.code ? ` [${assignmentError.code}]` : ''}`)
+      }
+
+      if (isDev) {
+        console.log(`[CreateTask] Successfully assigned ${memberships.length} students`)
+        // Dev-only: verify assignments readable
+        const { data: verifyRows, error: verifyErr } = await supabase
           .from('task_assignments')
-          .insert(assignments)
-
-        if (assignmentError) {
-          throw assignmentError
+          .select('id, student_id, status')
+          .eq('task_id', task.id)
+        if (verifyErr) {
+          console.warn('[CreateTask][verify] Could not read back assignments:', verifyErr.message)
+        } else {
+          console.log(`[CreateTask][verify] task_assignments for task ${task.id}: ${(verifyRows || []).length} rows`)
         }
       }
 
