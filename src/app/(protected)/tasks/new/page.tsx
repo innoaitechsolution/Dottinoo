@@ -220,21 +220,28 @@ export default function NewTaskPage() {
         const assignments = memberships.map(m => ({
           task_id: task.id,
           student_id: m.student_id,
+          status: 'not_started',
         }))
 
-        await supabase
+        const { error: assignmentError } = await supabase
           .from('task_assignments')
           .insert(assignments)
+
+        if (assignmentError) {
+          throw assignmentError
+        }
       }
 
       router.push('/app/tasks')
     } catch (err: any) {
       const errMsg = err?.message || 'Failed to create task'
+      const errDetails = err?.details ? ` (${err.details})` : ''
+      const errHint = err?.hint ? ` Hint: ${err.hint}` : ''
       const errCode = err?.code ? ` [${err.code}]` : ''
       if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
-        console.error('Error creating task:', { message: errMsg, code: err?.code, details: err?.details, hint: err?.hint })
+        console.error('Error creating task:', { message: err?.message, code: err?.code, details: err?.details, hint: err?.hint })
       }
-      setError(`${errMsg}${errCode}`)
+      setError(`${errMsg}${errDetails}${errHint}${errCode}`)
     } finally {
       setIsSubmitting(false)
     }
