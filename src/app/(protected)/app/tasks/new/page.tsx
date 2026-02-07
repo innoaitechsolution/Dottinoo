@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { getMyProfile, Profile } from '@/lib/supabase/profile'
 import { listMyClasses, Class, getClassStudents, ClassStudent } from '@/lib/supabase/classes'
+import { invalidateTaskCaches } from '@/lib/supabase/tasks'
 import { DIGITAL_SKILLS, SKILL_LEVELS, DigitalSkill, SkillLevel, getStudentsWithSkills, StudentWithSkills } from '@/lib/supabase/skillProfiles'
 import { getTemplate, getTemplateKeys, getTemplateDisplayName } from '@/lib/templates/taskTemplates'
 import Button from '@/components/Button'
@@ -395,6 +396,7 @@ function NewTaskPageContent() {
         }
       }
 
+      invalidateTaskCaches() // bust cache so tasks list refreshes
       router.push('/app/tasks')
     } catch (err: any) {
       const errMsg = err?.message || 'Failed to create task'

@@ -171,6 +171,29 @@
   padding: var(--spacing-xxl);
 }
 
+/* ---- Skeleton shimmer ---- */
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  pointer-events: none;
+}
+
+.skeletonLine {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-blue-50) 25%,
+    var(--color-bg-blue-100) 50%,
+    var(--color-bg-blue-50) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: var(--spacing-lg) var(--spacing-md);
